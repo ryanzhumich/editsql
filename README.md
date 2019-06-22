@@ -32,7 +32,7 @@ The evaluation scripts use python 2.7
 Please follow
 
 - `run_sparc_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq`
-- use segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_use_snippets`
+- use segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_segment_copy`
 
 This reproduces the SParC result in "SParC: Cross-Domain Semantic Parsing in Context"
 
