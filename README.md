@@ -13,7 +13,7 @@ Please cite this paper if you use our data/code.
 }
 ```
 
-Contact Rui Zhang at r.zhang@yale.edu for any question.
+Contact Rui Zhang for any question.
 
 ### Dependency
 
