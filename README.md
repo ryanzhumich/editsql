@@ -52,23 +52,23 @@ This reproduces the SParC result in "SParC: Cross-Domain Semantic Parsing in Con
   <tr>
     <td>CD-Seq2Seq</td>
     <td>21.9</td>
-    <td>23.2</td>
+    <td>-</td>
     <td>8.1</td>
-    <td>7.5</td>
+    <td>-</td>
   </tr>
   <tr>
     <td>CD-Seq2Seq+segment copy (use predicted query)</td>
     <td>21.7</td>
-    <td>20.3</td>
+    <td>-</td>
     <td>9.5</td>
-    <td>8.1</td>
+    <td>-</td>
   </tr>
   <tr>
     <td>CD-Seq2Seq+segment copy (use gold query)</td>
     <td>27.3</td>
-    <td>26.7</td>
+    <td>-</td>
     <td>10.0</td>
-    <td>8.4</td>
+    <td>-</td>
   </tr>
 </table>
 
