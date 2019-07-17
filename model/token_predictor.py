@@ -76,14 +76,6 @@ def score_schema_tokens(input_schema, schema_states, scorer):
 
     return scores, input_schema.column_names_surface_form
 
-def score_query_tokens(previous_query, previous_query_states, scorer):
-    scores = torch.t(torch.mm(torch.t(scorer), previous_query_states))   # num_tokens x 1
-
-    if scores.size()[0] != len(previous_query):
-        raise ValueError("Got " + str(scores.size()[0]) + " scores for " + str(len(previous_query)) + " query tokens")
-
-    return scores, previous_query
-
 
 class TokenPredictor(torch.nn.Module):
     """ Predicts a token given a (decoder) state.
@@ -156,10 +148,6 @@ class SchemaTokenPredictor(TokenPredictor):
 
     def _get_schema_token_scorer(self, state):
         scorer = torch.t(torch_utils.linear_layer(state, self.schema_token_weights))
-        return scorer
-
-    def _get_query_token_scorer(self, state):
-        scorer = torch.t(torch_utils.linear_layer(state, self.query_token_weights))
         return scorer
 
     def forward(self, prediction_input, dropout_amount=0.):
@@ -328,10 +316,6 @@ class SnippetAnonymizationTokenPredictor(SnippetTokenPredictor, AnonymizationTok
     def __init__(self, params, vocabulary, attention_key_size, snippet_size, anonymizer):    
         AnonymizationTokenPredictor.__init__(self, params, vocabulary, attention_key_size, anonymizer)
         SnippetTokenPredictor.__init__(self, params, vocabulary, attention_key_size, snippet_size)
-
-    def _get_query_token_scorer(self, state):
-        scorer = torch.t(torch_utils.linear_layer(state, self.query_token_weights))
-        return scorer
 
     def forward(self, prediction_input, dropout_amount=0.):
         decoder_state = prediction_input.decoder_state
