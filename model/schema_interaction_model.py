@@ -144,18 +144,6 @@ class SchemaInteractionATISModel(ATISModel):
         input_schema.set_column_name_embeddings(schema_states)
         return schema_states
 
-    def get_query_token_embedding(self, output_token, input_schema):
-        if input_schema:
-            if not (self.output_embedder.in_vocabulary(output_token) or input_schema.in_vocabulary(output_token, surface_form=True)):
-                output_token = 'value'
-            if self.output_embedder.in_vocabulary(output_token):
-                output_token_embedding = self.output_embedder(output_token)
-            else:
-                output_token_embedding = input_schema.column_name_embedder(output_token, surface_form=True)
-        else:
-            output_token_embedding = self.output_embedder(output_token)
-        return output_token_embedding
-
     def train_step(self, interaction, max_generation_length, snippet_alignment_probability=1.):
         """ Trains the interaction-level model on a single interaction.
 
