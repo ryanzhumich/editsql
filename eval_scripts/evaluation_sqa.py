@@ -383,7 +383,7 @@ class Evaluator:
             if score['f1'] != 1:
                 return 0
 
-        if len(label['from']['table_units']) > 1:
+        if len(label['from']['table_units']) > 0:
             label_tables = sorted(label['from']['table_units'])
             pred_tables = sorted(pred['from']['table_units'])
             return label_tables == pred_tables
