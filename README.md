@@ -29,7 +29,7 @@ The evaluation scripts use python 2.7
 
 ### Run SParC experiment
 
-Please follow
+First, download SParC from [here](https://yale-lily.github.io/sparc). Then please follow
 
 - `run_sparc_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq`
 - use segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_segment_copy`
