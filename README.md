@@ -1,15 +1,34 @@
-# CD-Seq2Seq for SParC
+# CD-Seq2Seq for SParC and CoSQL
 
-This is a pytorch implementation of the CD-Seq2Seq baseline in our ACL 2019 paper "[SParC: Cross-Domain Semantic Parsing in Context](https://arxiv.org/abs/1906.02285)".
+This is a pytorch implementation of the CD-Seq2Seq baseline in the following papers
+- "[SParC: Cross-Domain Semantic Parsing in Context](https://arxiv.org/abs/1906.02285)", ACL 2019
+- "[CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases](http://croma.eecs.umich.edu/pubs/coSQL_EMNLP2019.pdf)", EMNLP 2019
+- "[Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions](https://arxiv.org/pdf/1909.00786.pdf)", EMNLP 2019
 
-Please cite this paper if you use our data/code.
+Please cite the papers if you use our data and code.
 ```
-@InProceedings{Yu2019,
+@InProceedings{yu2019sparc,
   author =      "Tao Yu, Rui Zhang, Michihiro Yasunaga, Yi Chern Tan, Xi Victoria Lin, Suyi Li, Heyang Er, Irene Li, Bo Pang, Tao Chen, Emily Ji, Shreya Dixit, David Proctor, Sungrok Shim, Jonathan Kraft, Vincent Zhang, Caiming Xiong, Richard Socher, Dragomir Radev",
   title =       "SParC: Cross-Domain Semantic Parsing in Context",
   booktitle =   "Proceedings of The 57th Annual Meeting of the Association for Computational Linguistics",
   year =        "2019",
   address =     "Florence, Italy"
+}
+
+@InProceedings{yu2019cosql,
+  author =      "Tao Yu, Rui Zhang, He Yang Er, Suyi Li, Eric Xue, Bo Pang, Xi Victoria Lin, Yi Chern Tan, Tianze Shi, Zihan Li, Youxuan Jiang, Michihiro Yasunaga, Sungrok Shim, Tao Chen, Alexander Fabbri, Zifan Li, Luyao Chen, Yuwen Zhang, Shreya Dixit, Vincent Zhang, Caiming Xiong, Richard Socher, Walter Lasecki, Dragomir Radev",
+  title =       "CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases",
+  booktitle =   "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing",
+  year =        "2019",
+  address =     "Hong Kong, China"
+}
+
+@InProceedings{zhang2019editing,
+  author =      "Rui Zhang, Tao Yu, He Yang Er, Sungrok Shim, Eric Xue, Xi Victoria Lin, Tianze Shi, Caiming Xiong, Richard Socher, Dragomir Radev",
+  title =       "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions",
+  booktitle =   "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing",
+  year =        "2019",
+  address =     "Hong Kong, China"
 }
 ```
 
@@ -34,7 +53,7 @@ First, download SParC from [here](https://yale-lily.github.io/sparc). Then pleas
 - `run_sparc_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq`
 - use segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_segment_copy`
 
-This reproduces the SParC result in "SParC: Cross-Domain Semantic Parsing in Context"
+This reproduces the SParC result in "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions".
 
 <table>
   <tr>
@@ -69,6 +88,36 @@ This reproduces the SParC result in "SParC: Cross-Domain Semantic Parsing in Con
     <td>-</td>
     <td>10.0</td>
     <td>-</td>
+  </tr>
+</table>
+
+### Run CoSQL experiment
+
+First, download CoSQL from [here](https://yale-lily.github.io/cosql). Then please follow
+
+- `run_cosql_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_cosql_cdseq2seq`
+
+This reproduces the SQL-grounded dialog state tracking result in "CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases".
+
+<table>
+  <tr>
+    <th></th>
+    <th colspan="2">Question Match</th>
+    <th colspan="2">Interaction Match</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td>Dev</td>
+    <td>Test</td>
+    <td>Dev</td>
+    <td>Test</td>
+  </tr>
+  <tr>
+    <td>CD-Seq2Seq</td>
+    <td>13.8</td>
+    <td>13.9</td>
+    <td>2.1</td>
+    <td>2.6</td>
   </tr>
 </table>
 

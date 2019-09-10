@@ -2,7 +2,7 @@
 
 # 1. preprocess dataset by the following. It will produce data/sparc_data/
 
-python3 preprocess_sparc.py
+python3 preprocess.py --dataset=sparc
 
 # 2. train and evaluate.
 #    the result (models, logs, prediction outputs) are saved in $LOGDIR
@@ -29,4 +29,4 @@ CUDA_VISIBLE_DEVICES=0 python3 run.py --raw_train_filename="data/sparc_data/trai
 
 # 3. get evaluation result
 
-python3 postprocess_eval_sparc.py --pred_file $LOGDIR/valid_use_predicted_queries_predictions.json
+python3 postprocess_eval.py --dataset=sparc --split=dev --pred_file $LOGDIR/valid_use_predicted_queries_predictions.json
