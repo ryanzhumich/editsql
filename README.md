@@ -2,7 +2,7 @@
 
 This is a pytorch implementation of the CD-Seq2Seq baseline in the following papers
 - "[SParC: Cross-Domain Semantic Parsing in Context](https://arxiv.org/abs/1906.02285)", ACL 2019
-- "[CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases](http://croma.eecs.umich.edu/pubs/coSQL_EMNLP2019.pdf)", EMNLP 2019
+- "[CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases](https://arxiv.org/pdf/1909.05378.pdf)", EMNLP 2019
 - "[Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions](https://arxiv.org/pdf/1909.00786.pdf)", EMNLP 2019
 
 Please cite the papers if you use our data and code.
