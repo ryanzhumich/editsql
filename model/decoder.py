@@ -124,7 +124,12 @@ class SequencePredictorWithSchema(torch.nn.Module):
         return output_token_embedding
 
     def get_decoder_input(self, output_token_embedding, prediction):
-        decoder_input = torch.cat([output_token_embedding, prediction.utterance_attention_results.vector], dim=0)
+        if self.params.use_schema_attention and self.params.use_query_attention:
+            decoder_input = torch.cat([output_token_embedding, prediction.utterance_attention_results.vector, prediction.schema_attention_results.vector, prediction.query_attention_results.vector], dim=0)
+        elif self.params.use_schema_attention:
+            decoder_input = torch.cat([output_token_embedding, prediction.utterance_attention_results.vector, prediction.schema_attention_results.vector], dim=0)
+        else:
+            decoder_input = torch.cat([output_token_embedding, prediction.utterance_attention_results.vector], dim=0)
         return decoder_input
 
     def forward(self,
@@ -135,12 +140,13 @@ class SequencePredictorWithSchema(torch.nn.Module):
                 snippets=None,
                 gold_sequence=None,
                 input_sequence=None,
+                previous_queries=None,
+                previous_query_states=None,
                 input_schema=None,
                 dropout_amount=0.):
         """ Generates a sequence. """
         index = 0
 
-        # context_vector_size = self.token_predictor.attention_module.value_size
         context_vector_size = self.input_size - self.params.output_embedding_size
 
         # Decoder states: just the initialized decoder.
@@ -166,6 +172,8 @@ class SequencePredictorWithSchema(torch.nn.Module):
                                                              schema_states=schema_states,
                                                              snippets=snippets,
                                                              input_sequence=input_sequence,
+                                                             previous_queries=previous_queries,
+                                                             previous_query_states=previous_query_states,
                                                              input_schema=input_schema)
 
                 prediction = self.token_predictor(prediction_input, dropout_amount=dropout_amount)
@@ -188,8 +196,24 @@ class SequencePredictorWithSchema(torch.nn.Module):
                     probabilities = F.softmax(prediction.scores, dim=0).cpu().data.numpy().tolist()
 
                     distribution_map = prediction.aligned_tokens
-
                     assert len(probabilities) == len(distribution_map)
+
+                    if (not self.params.no_edit) and self.params.use_previous_query and self.params.use_copy_switch and len(previous_queries) > 0:
+                        assert prediction.query_scores.dim() == 1
+                        query_token_probabilities = F.softmax(prediction.query_scores, dim=0).cpu().data.numpy().tolist()
+
+                        query_token_distribution_map = prediction.query_tokens
+
+                        assert len(query_token_probabilities) == len(query_token_distribution_map)
+
+                        copy_switch = prediction.copy_switch.cpu().data.numpy()
+
+                        # Merge the two
+                        probabilities = ((np.array(probabilities) * (1 - copy_switch)).tolist() + 
+                                         (np.array(query_token_probabilities) * copy_switch).tolist()
+                                         )
+                        distribution_map =  distribution_map + query_token_distribution_map
+                        assert len(probabilities) == len(distribution_map)
 
                     # Get a new probabilities and distribution_map consolidating duplicates
                     distribution_map, probabilities = flatten_distribution(distribution_map, probabilities)

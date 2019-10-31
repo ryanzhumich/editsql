@@ -49,8 +49,21 @@ def interpret_args():
     parser.add_argument('--anonymization_scoring', type=bool, default=False)
     parser.add_argument('--use_snippets', type=bool, default=False)
 
+    parser.add_argument('--use_previous_query', type=bool, default=False)
+    parser.add_argument('--maximum_queries', type=int, default=1)
+    parser.add_argument('--use_copy_switch', type=bool, default=False)
+    parser.add_argument('--use_query_attention', type=bool, default=False)
+
+    parser.add_argument('--use_utterance_attention', type=bool, default=False)
+
     parser.add_argument('--freeze', type=bool, default=False)
     parser.add_argument('--scheduler', type=bool, default=False)
+
+    parser.add_argument('--use_bert', type=bool, default=False)
+    parser.add_argument("--bert_type_abb", type=str, help="Type of BERT model to load. e.g.) uS, uL, cS, cL, and mcS")
+    parser.add_argument("--bert_input_version", type=str, default='v1')
+    parser.add_argument('--fine_tune_bert', type=bool, default=False)
+    parser.add_argument('--lr_bert', default=1e-5, type=float, help='BERT model learning rate.')
 
     ### Debugging/logging parameters
     parser.add_argument('--logdir', type=str, default='logs')
@@ -81,6 +94,13 @@ def interpret_args():
     parser.add_argument('--previous_decoder_snippet_encoding', type=bool, default=False)
 
     parser.add_argument('--discourse_level_lstm', type=bool, default=False)
+
+    parser.add_argument('--use_schema_attention', type=bool, default=False)
+    parser.add_argument('--use_encoder_attention', type=bool, default=False)
+
+    parser.add_argument('--use_schema_encoder', type=bool, default=False)
+    parser.add_argument('--use_schema_self_attention', type=bool, default=False)
+    parser.add_argument('--use_schema_encoder_2', type=bool, default=False)
 
     ### Training parameters
     parser.add_argument('--batch_size', type=int, default=16)

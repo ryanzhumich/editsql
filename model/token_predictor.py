@@ -24,6 +24,8 @@ class PredictionInputWithSchema(namedtuple('PredictionInputWithSchema',
                                   'schema_states',
                                   'snippets',
                                   'input_sequence',
+                                  'previous_queries',
+                                  'previous_query_states',
                                   'input_schema'))):
     """ Inputs to the token predictor. """
     __slots__ = ()
@@ -33,16 +35,14 @@ class TokenPrediction(namedtuple('TokenPrediction',
                                  ('scores',
                                   'aligned_tokens',
                                   'utterance_attention_results',
+                                  'schema_attention_results',
+                                  'query_attention_results',
+                                  'copy_switch',
+                                  'query_scores',
+                                  'query_tokens',
                                   'decoder_state'))):
 
-    """A token prediction.
-
-    Attributes:
-        scores (dy.Expression): Scores for each possible output token.
-        aligned_tokens (list of str): The output tokens, aligned with the scores.
-        attention_results (AttentionResult): The result of attending on the input
-            sequence.
-    """
+    """A token prediction."""
     __slots__ = ()
 
 def score_snippets(snippets, scorer):
@@ -68,14 +68,16 @@ def score_snippets(snippets, scorer):
 
 def score_schema_tokens(input_schema, schema_states, scorer):
     # schema_states: emd_dim x num_tokens
-
     scores = torch.t(torch.mm(torch.t(scorer), schema_states))   # num_tokens x 1
-
     if scores.size()[0] != len(input_schema):
         raise ValueError("Got " + str(scores.size()[0]) + " scores for " + str(len(input_schema)) + " schema tokens")
-
     return scores, input_schema.column_names_surface_form
 
+def score_query_tokens(previous_query, previous_query_states, scorer):
+    scores = torch.t(torch.mm(torch.t(scorer), previous_query_states))   # num_tokens x 1
+    if scores.size()[0] != len(previous_query):
+        raise ValueError("Got " + str(scores.size()[0]) + " scores for " + str(len(previous_query)) + " query tokens")
+    return scores, previous_query
 
 class TokenPredictor(torch.nn.Module):
     """ Predicts a token given a (decoder) state.
@@ -139,8 +141,30 @@ class SchemaTokenPredictor(TokenPredictor):
                 raise ValueError("Snippet size must be greater than zero; was " + str(snippet_size))
             self.snippet_weights = torch_utils.add_params((params.decoder_state_size, snippet_size), "weights-snippet")
 
+        if params.use_schema_attention:
+            self.utterance_attention_module = self.attention_module
+            self.schema_attention_module = Attention(params.decoder_state_size, schema_attention_key_size, schema_attention_key_size)
+
+        if self.params.use_query_attention:
+            self.query_attention_module = Attention(params.decoder_state_size, params.encoder_state_size, params.encoder_state_size)
+            self.start_query_attention_vector = torch_utils.add_params((params.encoder_state_size,), "start_query_attention_vector")
+
+        if params.use_schema_attention and self.params.use_query_attention:
+            self.state_transform_weights = torch_utils.add_params((params.decoder_state_size + utterance_attention_key_size + schema_attention_key_size + params.encoder_state_size, params.decoder_state_size), "weights-state-transform")
+        elif params.use_schema_attention:
+            self.state_transform_weights = torch_utils.add_params((params.decoder_state_size + utterance_attention_key_size + schema_attention_key_size, params.decoder_state_size), "weights-state-transform")
+
         # Use lstm schema encoder
         self.schema_token_weights = torch_utils.add_params((params.decoder_state_size, schema_attention_key_size), "weights-schema-token")
+
+        if self.params.use_previous_query:
+            self.query_token_weights = torch_utils.add_params((params.decoder_state_size, self.params.encoder_state_size), "weights-query-token")
+
+        if self.params.use_copy_switch:
+            if self.params.use_query_attention:
+                self.state2copyswitch_transform_weights = torch_utils.add_params((params.decoder_state_size + utterance_attention_key_size + schema_attention_key_size + params.encoder_state_size, 1), "weights-state-transform")
+            else:
+                self.state2copyswitch_transform_weights = torch_utils.add_params((params.decoder_state_size + utterance_attention_key_size + schema_attention_key_size, 1), "weights-state-transform")
 
     def _get_snippet_scorer(self, state):
         scorer = torch.t(torch_utils.linear_layer(state, self.snippet_weights))
@@ -150,6 +174,14 @@ class SchemaTokenPredictor(TokenPredictor):
         scorer = torch.t(torch_utils.linear_layer(state, self.schema_token_weights))
         return scorer
 
+    def _get_query_token_scorer(self, state):
+        scorer = torch.t(torch_utils.linear_layer(state, self.query_token_weights))
+        return scorer
+
+    def _get_copy_switch(self, state):
+        copy_switch = torch.sigmoid(torch_utils.linear_layer(state, self.state2copyswitch_transform_weights))
+        return copy_switch.squeeze()
+
     def forward(self, prediction_input, dropout_amount=0.):
         decoder_state = prediction_input.decoder_state
         input_hidden_states = prediction_input.input_hidden_states
@@ -158,9 +190,28 @@ class SchemaTokenPredictor(TokenPredictor):
         input_schema = prediction_input.input_schema
         schema_states = prediction_input.schema_states
 
-        utterance_attention_results = self.attention_module(decoder_state, input_hidden_states)
+        if self.params.use_schema_attention:
+            schema_attention_results = self.schema_attention_module(decoder_state, schema_states)
+            utterance_attention_results = self.utterance_attention_module(decoder_state, input_hidden_states)
+        else:
+            utterance_attention_results = self.attention_module(decoder_state, input_hidden_states)
+            schema_attention_results = None
 
-        state_and_attn = torch.cat([decoder_state, utterance_attention_results.vector], dim=0)
+        query_attention_results = None
+        if self.params.use_query_attention:
+            previous_query_states = prediction_input.previous_query_states
+            if len(previous_query_states) > 0:
+                query_attention_results = self.query_attention_module(decoder_state, previous_query_states[-1])
+            else:
+                query_attention_results = self.start_query_attention_vector
+                query_attention_results = AttentionResult(None, None, query_attention_results)
+
+        if self.params.use_schema_attention and self.params.use_query_attention:
+            state_and_attn = torch.cat([decoder_state, utterance_attention_results.vector, schema_attention_results.vector, query_attention_results.vector], dim=0)
+        elif self.params.use_schema_attention:
+            state_and_attn = torch.cat([decoder_state, utterance_attention_results.vector, schema_attention_results.vector], dim=0)
+        else:
+            state_and_attn = torch.cat([decoder_state, utterance_attention_results.vector], dim=0)
 
         intermediate_state = self._get_intermediate_state(state_and_attn, dropout_amount=dropout_amount)
         vocab_scores, vocab_tokens = self._score_vocabulary_tokens(intermediate_state)
@@ -180,9 +231,25 @@ class SchemaTokenPredictor(TokenPredictor):
         final_scores = torch.cat([final_scores, schema_scores], dim=0)
         aligned_tokens.extend(schema_tokens)
 
+        # Previous Queries
+        previous_queries = prediction_input.previous_queries
+        previous_query_states = prediction_input.previous_query_states
+
+        copy_switch = None
+        query_scores = None
+        query_tokens = None
+        if self.params.use_previous_query and len(previous_queries) > 0:
+            if self.params.use_copy_switch:
+                copy_switch = self._get_copy_switch(state_and_attn)
+            for turn, (previous_query, previous_query_state) in enumerate(zip(previous_queries, previous_query_states)):
+                assert len(previous_query) == len(previous_query_state)
+                previous_query_state = torch.stack(previous_query_state, dim=1)
+                query_scores, query_tokens = score_query_tokens(previous_query, previous_query_state, self._get_query_token_scorer(intermediate_state))
+                query_scores = query_scores.squeeze()
+
         final_scores = final_scores.squeeze()
 
-        return TokenPrediction(final_scores, aligned_tokens, utterance_attention_results, decoder_state)
+        return TokenPrediction(final_scores, aligned_tokens, utterance_attention_results, schema_attention_results, query_attention_results, copy_switch, query_scores, query_tokens, decoder_state)
 
 
 class SnippetTokenPredictor(TokenPredictor):
@@ -235,7 +302,7 @@ class SnippetTokenPredictor(TokenPredictor):
 
         final_scores = final_scores.squeeze()
 
-        return TokenPrediction(final_scores, aligned_tokens, attention_results, decoder_state)
+        return TokenPrediction(final_scores, aligned_tokens, attention_results, None, None, None, None, None, decoder_state)
 
 
 class AnonymizationTokenPredictor(TokenPredictor):
@@ -306,14 +373,14 @@ class AnonymizationTokenPredictor(TokenPredictor):
 
         final_scores = final_scores.squeeze()
 
-        return TokenPrediction(final_scores, aligned_tokens, attention_results, decoder_state)
+        return TokenPrediction(final_scores, aligned_tokens, attention_results, None, None, None, None, None, decoder_state)
 
 
 # For Atis
 class SnippetAnonymizationTokenPredictor(SnippetTokenPredictor, AnonymizationTokenPredictor):
     """ Token predictor that both anonymizes and scores snippets."""
 
-    def __init__(self, params, vocabulary, attention_key_size, snippet_size, anonymizer):    
+    def __init__(self, params, vocabulary, attention_key_size, snippet_size, anonymizer):
         AnonymizationTokenPredictor.__init__(self, params, vocabulary, attention_key_size, anonymizer)
         SnippetTokenPredictor.__init__(self, params, vocabulary, attention_key_size, snippet_size)
 
@@ -358,7 +425,7 @@ class SnippetAnonymizationTokenPredictor(SnippetTokenPredictor, AnonymizationTok
 
         final_scores = final_scores.squeeze()
 
-        return TokenPrediction(final_scores, aligned_tokens, attention_results, decoder_state)
+        return TokenPrediction(final_scores, aligned_tokens, attention_results, None, None, None, None, None, decoder_state)
 
 def construct_token_predictor(params,
                               vocabulary,

@@ -5,6 +5,7 @@ import os
 import torch
 import torch.nn.functional as F
 from . import torch_utils
+from . import utils_bert
 
 from data_util.vocabulary import DEL_TOK, UNK_TOK
 
@@ -140,34 +141,49 @@ class ATISModel(torch.nn.Module):
 
         self.params = params
 
+        if params.use_bert:
+            self.model_bert, self.tokenizer, self.bert_config = utils_bert.get_bert(params)
+
         if 'atis' not in params.data_directory:
-            input_vocabulary_embeddings, output_vocabulary_embeddings, output_vocabulary_schema_embeddings, input_embedding_size = load_word_embeddings(input_vocabulary, output_vocabulary, output_vocabulary_schema, params)
+            if params.use_bert:
+                input_vocabulary_embeddings, output_vocabulary_embeddings, output_vocabulary_schema_embeddings, input_embedding_size = load_word_embeddings(input_vocabulary, output_vocabulary, output_vocabulary_schema, params)
 
-            params.input_embedding_size = input_embedding_size
-            self.params.input_embedding_size = input_embedding_size
+                # Create the output embeddings
+                self.output_embedder = Embedder(params.output_embedding_size,
+                                                name="output-embedding",
+                                                initializer=output_vocabulary_embeddings,
+                                                vocabulary=output_vocabulary,
+                                                anonymizer=anonymizer,
+                                                freeze=False)
+                self.column_name_token_embedder = None
+            else:
+                input_vocabulary_embeddings, output_vocabulary_embeddings, output_vocabulary_schema_embeddings, input_embedding_size = load_word_embeddings(input_vocabulary, output_vocabulary, output_vocabulary_schema, params)
 
-            # Create the input embeddings
-            self.input_embedder = Embedder(params.input_embedding_size,
-                                           name="input-embedding",
-                                           initializer=input_vocabulary_embeddings,
-                                           vocabulary=input_vocabulary,
-                                           anonymizer=anonymizer,
-                                           freeze=params.freeze)
+                params.input_embedding_size = input_embedding_size
+                self.params.input_embedding_size = input_embedding_size
 
-            # Create the output embeddings
-            self.output_embedder = Embedder(params.output_embedding_size,
-                                            name="output-embedding",
-                                            initializer=output_vocabulary_embeddings,
-                                            vocabulary=output_vocabulary,
-                                            anonymizer=anonymizer,
-                                            freeze=False)
+                # Create the input embeddings
+                self.input_embedder = Embedder(params.input_embedding_size,
+                                               name="input-embedding",
+                                               initializer=input_vocabulary_embeddings,
+                                               vocabulary=input_vocabulary,
+                                               anonymizer=anonymizer,
+                                               freeze=params.freeze)
 
-            self.column_name_token_embedder = Embedder(params.input_embedding_size,
-                                            name="schema-embedding",
-                                            initializer=output_vocabulary_schema_embeddings,
-                                            vocabulary=output_vocabulary_schema,
-                                            anonymizer=anonymizer,
-                                            freeze=params.freeze)
+                # Create the output embeddings
+                self.output_embedder = Embedder(params.output_embedding_size,
+                                                name="output-embedding",
+                                                initializer=output_vocabulary_embeddings,
+                                                vocabulary=output_vocabulary,
+                                                anonymizer=anonymizer,
+                                                freeze=False)
+
+                self.column_name_token_embedder = Embedder(params.input_embedding_size,
+                                                name="schema-embedding",
+                                                initializer=output_vocabulary_schema_embeddings,
+                                                vocabulary=output_vocabulary_schema,
+                                                anonymizer=anonymizer,
+                                                freeze=params.freeze)
         else:
             # Create the input embeddings
             self.input_embedder = Embedder(params.input_embedding_size,
@@ -188,6 +204,8 @@ class ATISModel(torch.nn.Module):
         # Create the encoder
         encoder_input_size = params.input_embedding_size
         encoder_output_size = params.encoder_state_size
+        if params.use_bert:
+            encoder_input_size = self.bert_config.hidden_size
 
         if params.discourse_level_lstm:
             encoder_input_size += params.encoder_state_size / 2
@@ -230,6 +248,10 @@ class ATISModel(torch.nn.Module):
             self.snippet_encoder = Encoder(params.snippet_num_layers,
                                            params.output_embedding_size,
                                            snippet_encoding_size)
+
+        # Previous query Encoder
+        if params.use_previous_query:
+            self.query_encoder = Encoder(params.encoder_num_layers, params.output_embedding_size, params.encoder_state_size)
 
         self.final_snippet_size = final_snippet_size
         self.dropout = 0.
@@ -285,7 +307,7 @@ class ATISModel(torch.nn.Module):
 
         return discourse_state, discourse_lstm_states
 
-    def _add_positional_embeddings(self, hidden_states, utterances):
+    def _add_positional_embeddings(self, hidden_states, utterances, group=False):
         grouped_states = []
 
         start_index = 0
@@ -311,17 +333,26 @@ class ATISModel(torch.nn.Module):
                 + "but they were " + str(len(utterance)) \
                 + " and " + str(len(positional_sequence))
 
-            new_states.extend(positional_sequence)
+            if group:
+                new_states.append(positional_sequence)
+            else:
+                new_states.extend(positional_sequence)
             flat_sequence.extend(utterance)
 
         return new_states, flat_sequence
 
     def build_optim(self):
         params_trainer = []
+        params_bert_trainer = []
         for name, param in self.named_parameters():
             if param.requires_grad:
-                params_trainer.append(param)
+                if 'model_bert' in name:
+                    params_bert_trainer.append(param)
+                else:
+                    params_trainer.append(param)
         self.trainer = torch.optim.Adam(params_trainer, lr=self.params.initial_learning_rate)
+        if self.params.fine_tune_bert:
+            self.bert_trainer = torch.optim.Adam(params_bert_trainer, lr=self.params.lr_bert)
 
     def set_dropout(self, value):
         """ Sets the dropout to a specified value.

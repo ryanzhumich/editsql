@@ -5,11 +5,8 @@ from enum import Enum
 import random
 import sys
 import json
-
 import progressbar
-
 import model.torch_utils
-
 import data_util.sql_util
 import torch
 
@@ -26,7 +23,6 @@ def write_prediction(fileptr,
                      database_username,
                      database_password,
                      database_timeout,
-                     #                     inference_memory,
                      compute_metrics=True):
     pred_obj = {}
     pred_obj["identifier"] = identifier
@@ -46,7 +42,6 @@ def write_prediction(fileptr,
     pred_obj["flat_gold_queries"] = flat_gold_queries
     pred_obj["index_in_interaction"] = index_in_interaction
     pred_obj["gold_tables"] = str(gold_tables)
-#  pred_obj["inference_memory"] = inference_memory
 
     # Now compute the metrics we want.
 
@@ -192,6 +187,9 @@ def train_epoch_with_interactions(interaction_batches,
         interaction = interaction_batch.items[0]
 
         if interaction.identifier == "raw/atis2/12-1.1/ATIS2/TEXT/TEST/NOV92/770/5":
+            continue
+
+        if 'sparc' in params.data_directory and "baseball_1" in interaction.identifier:
             continue
 
         batch_loss = model.train_step(interaction, params.train_maximum_sql_length)

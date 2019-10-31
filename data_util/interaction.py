@@ -11,6 +11,8 @@ class Schema:
     def __init__(self, table_schema, simple=False):
         if simple:
             self.helper1(table_schema)
+        else:
+            self.helper2(table_schema)
 
     def helper1(self, table_schema):
         self.table_schema = table_schema
@@ -53,6 +55,62 @@ class Schema:
             if i in column_keep_index_2:
                 self.column_names_embedder_input.append(column_name_embedder_input)
                 self.column_names_embedder_input_to_id[column_name_embedder_input] = len(self.column_names_embedder_input) - 1
+
+        max_id_1 = max(v for k,v in self.column_names_surface_form_to_id.items())
+        max_id_2 = max(v for k,v in self.column_names_embedder_input_to_id.items())
+        assert (len(self.column_names_surface_form) - 1) == max_id_2 == max_id_1
+
+        self.num_col = len(self.column_names_surface_form)
+
+    def helper2(self, table_schema):
+        self.table_schema = table_schema
+        column_names = table_schema['column_names']
+        column_names_original = table_schema['column_names_original']
+        table_names = table_schema['table_names']
+        table_names_original = table_schema['table_names_original']
+        assert len(column_names) == len(column_names_original) and len(table_names) == len(table_names_original)
+
+        column_keep_index = []
+
+        self.column_names_surface_form = []
+        self.column_names_surface_form_to_id = {}
+        for i, (table_id, column_name) in enumerate(column_names_original):
+            if table_id >= 0:
+                table_name = table_names_original[table_id]
+                column_name_surface_form = '{}.{}'.format(table_name,column_name)
+            else:
+                column_name_surface_form = column_name
+            column_name_surface_form = column_name_surface_form.lower()
+            if column_name_surface_form not in self.column_names_surface_form_to_id:
+                self.column_names_surface_form.append(column_name_surface_form)
+                self.column_names_surface_form_to_id[column_name_surface_form] = len(self.column_names_surface_form) - 1
+                column_keep_index.append(i)
+
+        start_i = len(self.column_names_surface_form_to_id)
+        for i, table_name in enumerate(table_names_original):
+            column_name_surface_form = '{}.*'.format(table_name.lower())
+            self.column_names_surface_form.append(column_name_surface_form)
+            self.column_names_surface_form_to_id[column_name_surface_form] = i + start_i
+
+        self.column_names_embedder_input = []
+        self.column_names_embedder_input_to_id = {}
+        for i, (table_id, column_name) in enumerate(column_names):
+            if table_id >= 0:
+                table_name = table_names[table_id]
+                column_name_embedder_input = table_name + ' . ' + column_name
+            else:
+                column_name_embedder_input = column_name
+            if i in column_keep_index:
+                self.column_names_embedder_input.append(column_name_embedder_input)
+                self.column_names_embedder_input_to_id[column_name_embedder_input] = len(self.column_names_embedder_input) - 1
+
+        start_i = len(self.column_names_embedder_input_to_id)
+        for i, table_name in enumerate(table_names):
+            column_name_embedder_input = table_name + ' . *'
+            self.column_names_embedder_input.append(column_name_embedder_input)
+            self.column_names_embedder_input_to_id[column_name_embedder_input] = i + start_i
+
+        assert len(self.column_names_surface_form) == len(self.column_names_surface_form_to_id) == len(self.column_names_embedder_input) == len(self.column_names_embedder_input_to_id)
 
         max_id_1 = max(v for k,v in self.column_names_surface_form_to_id.items())
         max_id_2 = max(v for k,v in self.column_names_embedder_input_to_id.items())
@@ -194,7 +252,10 @@ def load_function(parameters,
 
         schema = None
         if database_schema:
-            schema = Schema(database_schema[database_id], simple=True)
+            if 'removefrom' not in parameters.data_directory:
+                schema = Schema(database_schema[database_id], simple=True)
+            else:
+                schema = Schema(database_schema[database_id])
 
         snippet_bank = []
 

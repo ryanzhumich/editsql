@@ -56,7 +56,7 @@ def compute_loss(gold_seq,
         if len(gold_indices) == 1:
             noise_i = 0
 
-        probdist = F.softmax(score, dim=0)
+        probdist = score
         prob_of_tok = noise_i + torch.sum(probdist[gold_indices])
         losses.append(-torch.log(prob_of_tok))
 

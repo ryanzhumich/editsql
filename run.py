@@ -314,6 +314,13 @@ def main():
         for param in param_group['params']:
             print(param.size())
 
+    if params.fine_tune_bert:
+        print('=====================Parameters in BERT Optimizer==============')
+        for param_group in model.bert_trainer.param_groups:
+            print(param_group.keys())
+            for param in param_group['params']:
+                print(param.size())
+
     sys.stdout.flush()
 
     last_save_file = ""

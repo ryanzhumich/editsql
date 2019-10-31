@@ -1,0 +1,1354 @@
+medium pred: select Name , Song_release_year from singer order by Age asc limit 1
+medium gold: SELECT song_name ,  song_release_year FROM singer ORDER BY age LIMIT 1
+
+medium pred: select avg ( Capacity ) , min ( Capacity ) from stadium
+medium gold: SELECT avg(capacity) ,  max(capacity) FROM stadium
+
+medium pred: select T1.Name , T1.Capacity from stadium as T1 join concert as T2 on T1.Stadium_ID = T2.Stadium_ID group by T2.Stadium_ID order by avg ( T1.Average ) desc limit 1
+medium gold: SELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1
+
+medium pred: select T1.Name , T1.Capacity from stadium as T1 join concert as T2 on T1.Stadium_ID = T2.Stadium_ID group by T2.Stadium_ID order by avg ( T1.Highest ) desc limit 1
+medium gold: SELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1
+
+extra pred: select T1.Name , T1.Capacity from stadium as T1 join concert as T2 on T1.Stadium_ID = T2.Stadium_ID where T2.Year > 1 group by T2.Stadium_ID order by count ( * ) desc limit 1
+extra gold: SELECT T2.name ,  T2.capacity FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  >=  2014 GROUP BY T2.stadium_id ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select concert_Name , Theme , count ( * ) from concert group by Theme
+medium gold: SELECT T2.concert_name ,  T2.theme ,  count(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T2.concert_id
+
+medium pred: select T3.Song_Name , T1.Theme , count ( * ) from concert as T1 join singer_in_concert as T2 on T1.concert_ID = T2.concert_ID join singer as T3 on T2.Singer_ID = T3.Singer_ID group by T1.Theme
+medium gold: SELECT T2.concert_name ,  T2.theme ,  count(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T2.concert_id
+
+medium pred: select Name , count ( * ) from singer group by Name
+medium gold: SELECT T2.name ,  count(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id GROUP BY T2.singer_id
+
+medium pred: select Name , count ( * ) from singer group by Name
+medium gold: SELECT T2.name ,  count(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id GROUP BY T2.singer_id
+
+hard pred: select count ( * ) from concert as T1 join stadium as T2 on T1.Stadium_ID = T2.Stadium_ID where T2.Capacity = ( select max ( Capacity ) from stadium )
+hard gold: SELECT count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id ORDER BY T2.Capacity DESC LIMIT 1
+
+medium pred: select count ( * ) from Student where Age > 1
+medium gold: SELECT count(*) FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid WHERE T1.age  >  20
+
+medium pred: select count ( * ) from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T3.Age > 1
+medium gold: SELECT count(*) FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid WHERE T1.age  >  20
+
+hard pred: select count ( * ) from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T3.Sex = 1
+hard gold: SELECT count(*) FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T2.petid  =  T3.petid WHERE T1.sex  =  'F' AND T3.pettype  =  'dog'
+
+extra pred: select Major , Age from Student where StuID not in ( select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1 )
+extra gold: SELECT major ,  age FROM student WHERE stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat')
+
+extra pred: select Major , Age from Student where StuID not in ( select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1 )
+extra gold: SELECT major ,  age FROM student WHERE stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat')
+
+hard pred: select StuID from Student except select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1
+hard gold: SELECT stuid FROM student EXCEPT SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat'
+
+hard pred: select StuID from Student except select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1
+hard gold: SELECT stuid FROM student EXCEPT SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat'
+
+extra pred: select Fname , Age from Student where StuID not in ( select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1 )
+extra gold: SELECT T1.fname ,  T1.age FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'dog' AND T1.stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat')
+
+eval_err_num:1
+extra pred: select Fname from Student where StuID in ( select T1.StuID from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.PetType = 1 ) except select T5.Fname from Pets as T5 join Has_Pet as T4 on T5.PetID = T4.PetID join Student as T5 on T4.StuID = T5.StuID where T3.PetType = 1
+extra gold: SELECT T1.fname ,  T1.age FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'dog' AND T1.stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pettype  =  'cat')
+
+medium pred: select PetType , weight from Pets order by weight asc limit 1
+medium gold: SELECT pettype ,  weight FROM pets ORDER BY pet_age LIMIT 1
+
+medium pred: select T1.PetID , T2.weight from Has_Pet as T1 join Pets as T2 on T1.PetID = T2.PetID where T2.pet_age > 1
+medium gold: SELECT petid ,  weight FROM pets WHERE pet_age  >  1
+
+medium pred: select PetType , avg ( pet_age ) from Pets group by PetType
+medium gold: SELECT avg(pet_age) ,  max(pet_age) ,  pettype FROM pets GROUP BY pettype
+
+medium pred: select PetType , avg ( pet_age ) from Pets group by PetType
+medium gold: SELECT avg(pet_age) ,  max(pet_age) ,  pettype FROM pets GROUP BY pettype
+
+medium pred: select Fname , Age from Student
+medium gold: SELECT DISTINCT T1.fname ,  T1.age FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid
+
+medium pred: select Fname , Age from Student
+medium gold: SELECT DISTINCT T1.fname ,  T1.age FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid
+
+medium pred: select T1.PetID from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T3.LName = 1
+medium gold: SELECT T2.petid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid WHERE T1.Lname  =  'Smith'
+
+medium pred: select T1.PetID from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T3.LName = 1
+medium gold: SELECT T2.petid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid WHERE T1.Lname  =  'Smith'
+
+medium pred: select count ( * ) , StuID from Has_Pet group by StuID
+medium gold: SELECT count(*) ,  T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid GROUP BY T1.stuid
+
+medium pred: select count ( * ) , StuID from Has_Pet group by StuID
+medium gold: SELECT count(*) ,  T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid GROUP BY T1.stuid
+
+hard pred: select T3.LName from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T1.pet_age = 1 and T1.pet_age = 1
+hard gold: SELECT T1.lname FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pet_age  =  3 AND T3.pettype  =  'cat'
+
+hard pred: select T3.LName from Pets as T1 join Has_Pet as T2 on T1.PetID = T2.PetID join Student as T3 on T2.StuID = T3.StuID where T1.PetType = 1 and T3.Age = 1
+hard gold: SELECT T1.lname FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid JOIN pets AS T3 ON T3.petid  =  T2.petid WHERE T3.pet_age  =  3 AND T3.pettype  =  'cat'
+
+extra pred: select avg ( Age ) from Student where StuID not in ( select StuID from Has_Pet )
+extra gold: SELECT avg(age) FROM student WHERE stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid)
+
+extra pred: select avg ( Age ) from Student where StuID not in ( select StuID from Has_Pet )
+extra gold: SELECT avg(age) FROM student WHERE stuid NOT IN (SELECT T1.stuid FROM student AS T1 JOIN has_pet AS T2 ON T1.stuid  =  T2.stuid)
+
+medium pred: select T2.Continent , T2.Continent , count ( * ) from countries as T1 join continents as T2 on T1.Continent = T2.ContId group by T1.Continent
+medium gold: SELECT T1.ContId ,  T1.Continent ,  count(*) FROM CONTINENTS AS T1 JOIN COUNTRIES AS T2 ON T1.ContId  =  T2.Continent GROUP BY T1.ContId;
+
+medium pred: select T2.Continent , T1.CountryName , count ( * ) from countries as T1 join continents as T2 on T1.Continent = T2.ContId group by T2.Continent
+medium gold: SELECT T1.ContId ,  T1.Continent ,  count(*) FROM CONTINENTS AS T1 JOIN COUNTRIES AS T2 ON T1.ContId  =  T2.Continent GROUP BY T1.ContId;
+
+medium pred: select FullName , Id , count ( * ) from car_makers group by Id
+medium gold: SELECT T1.FullName ,  T1.Id ,  count(*) FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id;
+
+medium pred: select FullName , count ( * ) from car_makers group by Id
+medium gold: SELECT T1.FullName ,  T1.Id ,  count(*) FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id;
+
+extra pred: select T2.Make , T1.Year from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId order by T1.Year asc limit 1
+extra gold: SELECT T2.Make ,  T1.Year FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T1.Year  =  (SELECT min(YEAR) FROM CARS_DATA);
+
+extra pred: select Maker , Maker from car_makers where FullName = 1
+extra gold: SELECT T2.Make ,  T1.Year FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T1.Year  =  (SELECT min(YEAR) FROM CARS_DATA);
+
+hard pred: select T2.Model from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Year > 1
+hard gold: SELECT DISTINCT T1.model FROM MODEL_LIST AS T1 JOIN CAR_NAMES AS T2 ON T1.model  =  T2.model JOIN CARS_DATA AS T3 ON T2.MakeId  =  T3.id WHERE T3.year  >  1980;
+
+hard pred: select T2.Continent , count ( * ) from countries as T1 join continents as T2 on T1.Continent = T2.ContId group by T1.Continent
+hard gold: SELECT T1.Continent ,  count(*) FROM CONTINENTS AS T1 JOIN COUNTRIES AS T2 ON T1.ContId  =  T2.continent JOIN car_makers AS T3 ON T2.CountryId  =  T3.Country GROUP BY T1.Continent;
+
+hard pred: select Continent , count ( * ) from continents group by Continent
+hard gold: SELECT T1.Continent ,  count(*) FROM CONTINENTS AS T1 JOIN COUNTRIES AS T2 ON T1.ContId  =  T2.continent JOIN car_makers AS T3 ON T2.CountryId  =  T3.Country GROUP BY T1.Continent;
+
+extra pred: select CountryName from countries group by CountryName order by count ( * ) desc limit 1
+extra gold: SELECT T2.CountryName FROM CAR_MAKERS AS T1 JOIN COUNTRIES AS T2 ON T1.Country  =  T2.CountryId GROUP BY T1.Country ORDER BY Count(*) DESC LIMIT 1;
+
+medium pred: select Maker , FullName , count ( * ) from car_makers group by Id
+medium gold: SELECT Count(*) ,  T2.FullName ,  T2.id FROM MODEL_LIST AS T1 JOIN CAR_MAKERS AS T2 ON T1.Maker  =  T2.Id GROUP BY T2.id;
+
+medium pred: select Maker , FullName , count ( * ) from car_makers group by Id , FullName
+medium gold: SELECT Count(*) ,  T2.FullName ,  T2.id FROM MODEL_LIST AS T1 JOIN CAR_MAKERS AS T2 ON T1.Maker  =  T2.Id GROUP BY T2.id;
+
+medium pred: select T1.Accelerate from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T2.Make = 1 and T2.Make = 1
+medium gold: SELECT T1.Accelerate FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T2.Make  =  'amc hornet sportabout (sw)';
+
+medium pred: select T1.Accelerate from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T2.Model = 1
+medium gold: SELECT T1.Accelerate FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T2.Make  =  'amc hornet sportabout (sw)';
+
+medium pred: select count ( * ) from car_makers as T1 join countries as T2 on T1.Country = T2.CountryId where T2.Continent = 1
+medium gold: SELECT count(*) FROM CAR_MAKERS AS T1 JOIN COUNTRIES AS T2 ON T1.Country  =  T2.CountryId WHERE T2.CountryName  =  'france';
+
+medium pred: select count ( * ) from countries where Continent = 1
+medium gold: SELECT count(*) FROM CAR_MAKERS AS T1 JOIN COUNTRIES AS T2 ON T1.Country  =  T2.CountryId WHERE T2.CountryName  =  'france';
+
+hard pred: select count ( * ) from continents where Continent = 1
+hard gold: SELECT count(*) FROM MODEL_LIST AS T1 JOIN CAR_MAKERS AS T2 ON T1.Maker  =  T2.Id JOIN COUNTRIES AS T3 ON T2.Country  =  T3.CountryId WHERE T3.CountryName  =  'usa';
+
+hard pred: select count ( * ) from continents where Continent = 1
+hard gold: SELECT count(*) FROM MODEL_LIST AS T1 JOIN CAR_MAKERS AS T2 ON T1.Maker  =  T2.Id JOIN COUNTRIES AS T3 ON T2.Country  =  T3.CountryId WHERE T3.CountryName  =  'usa';
+
+easy pred: select avg ( Horsepower ) from cars_data where Cylinders = 1
+easy gold: SELECT avg(mpg) FROM CARS_DATA WHERE Cylinders  =  4;
+
+hard pred: select min ( Weight ) from cars_data where Cylinders = 1 and Year = 1
+hard gold: SELECT Weight FROM CARS_DATA WHERE Cylinders  =  4 AND YEAR  =  1974 ORDER BY Weight ASC LIMIT 1;
+
+hard pred: select Weight from cars_data where Cylinders = 1 and Cylinders = 1
+hard gold: SELECT Weight FROM CARS_DATA WHERE Cylinders  =  4 AND YEAR  =  1974 ORDER BY Weight ASC LIMIT 1;
+
+medium pred: select T1.Maker , T2.Model from car_makers as T1 join model_list as T2 on T1.Id = T2.Maker
+medium gold: SELECT Maker ,  Model FROM MODEL_LIST;
+
+medium pred: select T1.Maker , T2.Model from car_makers as T1 join model_list as T2 on T1.Id = T2.Maker
+medium gold: SELECT Maker ,  Model FROM MODEL_LIST;
+
+medium pred: select CountryName , CountryId from countries group by CountryId having count ( * ) > = 1
+medium gold: SELECT T1.CountryName ,  T1.CountryId FROM COUNTRIES AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.CountryId HAVING count(*)  >=  1;
+
+medium pred: select CountryName , CountryId from countries group by CountryId having count ( * ) > = 1
+medium gold: SELECT T1.CountryName ,  T1.CountryId FROM COUNTRIES AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.CountryId HAVING count(*)  >=  1;
+
+medium pred: select avg ( Weight ) , avg ( Weight ) , Year from cars_data group by Year
+medium gold: SELECT avg(Weight) ,  YEAR FROM CARS_DATA GROUP BY YEAR;
+
+extra pred: select T2.Continent from countries as T1 join continents as T2 on T1.Continent = T2.ContId group by T1.Continent having count ( * ) > = 1
+extra gold: SELECT T1.CountryName FROM COUNTRIES AS T1 JOIN CONTINENTS AS T2 ON T1.Continent  =  T2.ContId JOIN CAR_MAKERS AS T3 ON T1.CountryId  =  T3.Country WHERE T2.Continent  =  'europe' GROUP BY T1.CountryName HAVING count(*)  >=  3;
+
+extra pred: select CountryName from countries where Continent = 1 group by CountryName having count ( * ) > = 1
+extra gold: SELECT T1.CountryName FROM COUNTRIES AS T1 JOIN CONTINENTS AS T2 ON T1.Continent  =  T2.ContId JOIN CAR_MAKERS AS T3 ON T1.CountryId  =  T3.Country WHERE T2.Continent  =  'europe' GROUP BY T1.CountryName HAVING count(*)  >=  3;
+
+extra pred: select max ( T1.Horsepower ) , T2.Make from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Cylinders = 1 group by T2.Make
+extra gold: SELECT T2.horsepower ,  T1.Make FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id WHERE T2.cylinders  =  3 ORDER BY T2.horsepower DESC LIMIT 1;
+
+extra pred: select max ( T1.Horsepower ) , T2.Model from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId group by T2.Make
+extra gold: SELECT T2.horsepower ,  T1.Make FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id WHERE T2.cylinders  =  3 ORDER BY T2.horsepower DESC LIMIT 1;
+
+hard pred: select max ( T3.Horsepower ) , T1.Model from model_list as T1 join car_names as T2 on T1.Model = T2.Model join cars_data as T3 on T2.MakeId = T3.Id group by T1.Model order by avg ( T3.Horsepower ) desc limit 1
+hard gold: SELECT T1.Model FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id ORDER BY T2.mpg DESC LIMIT 1;
+
+hard pred: select Id from cars_data where MPG = ( select max ( MPG ) from cars_data )
+hard gold: SELECT T1.Model FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id ORDER BY T2.mpg DESC LIMIT 1;
+
+medium pred: select avg ( Edispl ) from cars_data
+medium gold: SELECT avg(T2.edispl) FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id WHERE T1.Model  =  'volvo';
+
+medium pred: select max ( Cylinders ) from cars_data
+medium gold: SELECT max(Accelerate) ,  Cylinders FROM CARS_DATA GROUP BY Cylinders;
+
+medium pred: select max ( Accelerate ) from cars_data
+medium gold: SELECT max(Accelerate) ,  Cylinders FROM CARS_DATA GROUP BY Cylinders;
+
+hard pred: select T2.Make from model_list as T1 join car_names as T2 on T1.Model = T2.Model group by T2.Make order by count ( * ) desc limit 1
+hard gold: SELECT Model FROM CAR_NAMES GROUP BY Model ORDER BY count(*) DESC LIMIT 1;
+
+hard pred: select Model from model_list group by Model order by count ( * ) desc limit 1
+hard gold: SELECT Model FROM CAR_NAMES GROUP BY Model ORDER BY count(*) DESC LIMIT 1;
+
+easy pred: select count ( * ) from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Cylinders > 1
+easy gold: SELECT count(*) FROM CARS_DATA WHERE Cylinders  >  4;
+
+medium pred: select count ( * ) from car_makers where FullName = 1
+medium gold: SELECT count(*) FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker WHERE T1.FullName  =  'American Motor Company';
+
+medium pred: select count ( * ) from model_list where Maker = 1
+medium gold: SELECT count(*) FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker WHERE T1.FullName  =  'American Motor Company';
+
+medium pred: select Maker , Id from car_makers group by Id having count ( * ) > 1
+medium gold: SELECT T1.FullName ,  T1.Id FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id HAVING count(*)  >  3;
+
+medium pred: select FullName , Id from car_makers group by Id having count ( * ) > 1
+medium gold: SELECT T1.FullName ,  T1.Id FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id HAVING count(*)  >  3;
+
+extra pred: select T2.Model from car_makers as T1 join model_list as T2 on T1.Id = T2.Maker where T1.FullName = 1 or T1.FullName = 1
+extra gold: SELECT DISTINCT T2.Model FROM CAR_NAMES AS T1 JOIN MODEL_LIST AS T2 ON T1.Model  =  T2.Model JOIN CAR_MAKERS AS T3 ON T2.Maker  =  T3.Id JOIN CARS_DATA AS T4 ON T1.MakeId  =  T4.Id WHERE T3.FullName  =  'General Motors' OR T4.weight  >  3500;
+
+extra pred: select T3.Model from car_makers as T1 join model_list as T2 on T1.Id = T2.Maker join car_names as T3 on T2.Model = T3.Model join cars_data as T4 on T3.MakeId = T4.Id where T1.Maker = 1 or T4.Weight > 1
+extra gold: SELECT DISTINCT T2.Model FROM CAR_NAMES AS T1 JOIN MODEL_LIST AS T2 ON T1.Model  =  T2.Model JOIN CAR_MAKERS AS T3 ON T2.Maker  =  T3.Id JOIN CARS_DATA AS T4 ON T1.MakeId  =  T4.Id WHERE T3.FullName  =  'General Motors' OR T4.weight  >  3500;
+
+medium pred: select Year from cars_data where Weight < 1 intersect select Year from cars_data where Weight < 1
+medium gold: SELECT DISTINCT T1.Year FROM CARS_DATA AS T1 WHERE T1.Weight  >  3000 AND T1.weight  <  4000;
+
+medium pred: select Year from cars_data where Weight < 1 intersect select Year from cars_data where Weight > 1
+medium gold: SELECT DISTINCT T1.Year FROM CARS_DATA AS T1 WHERE T1.Weight  >  3000 AND T1.weight  <  4000;
+
+extra pred: select T1.Cylinders from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T2.Model = 1 group by T2.Model order by count ( * ) asc limit 1
+extra gold: SELECT T1.cylinders FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T2.Model  =  'volvo' ORDER BY T1.accelerate ASC LIMIT 1;
+
+extra pred: select T1.Cylinders from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T2.Model = 1 group by T1.Cylinders order by count ( * ) desc limit 1
+extra gold: SELECT T1.cylinders FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T2.Model  =  'volvo' ORDER BY T1.accelerate ASC LIMIT 1;
+
+hard pred: select count ( * ) from cars_data where Horsepower > ( select max ( Horsepower ) from cars_data )
+hard gold: SELECT COUNT(*) FROM CARS_DATA WHERE Accelerate  >  ( SELECT Accelerate FROM CARS_DATA ORDER BY Horsepower DESC LIMIT 1 );
+
+hard pred: select count ( * ) from cars_data where Horsepower > ( select max ( Horsepower ) from cars_data )
+hard gold: SELECT COUNT(*) FROM CARS_DATA WHERE Accelerate  >  ( SELECT Accelerate FROM CARS_DATA ORDER BY Horsepower DESC LIMIT 1 );
+
+easy pred: select count ( * ) from car_makers ( select Country from car_makers group by Country having count ( * ) > 1 )
+easy gold: SELECT COUNT(*) FROM ( SELECT T1.CountryId ,  COUNT(*) FROM COUNTRIES AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.CountryId HAVING count(*)  >  2 );
+
+easy pred: select count ( * ) from countries ( select Continent from countries group by Continent having count ( * ) > 1 )
+easy gold: SELECT COUNT(*) FROM ( SELECT T1.CountryId ,  COUNT(*) FROM COUNTRIES AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.CountryId HAVING count(*)  >  2 );
+
+extra pred: select T2.Model from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Cylinders = ( select max ( Horsepower ) from cars_data )
+extra gold: SELECT T1.Model FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id WHERE T2.Cylinders  =  4 ORDER BY T2.horsepower DESC LIMIT 1;
+
+extra pred: select T2.Model , T2.Make from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Horsepower > 1 and T2.Make != 1
+extra gold: SELECT T2.MakeId ,  T2.Make FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T1.Horsepower  >  (SELECT min(Horsepower) FROM CARS_DATA) AND T1.Cylinders  <=  3;
+
+extra pred: select T2.MakeId , T2.Make from cars_data as T1 join car_names as T2 on T1.Id = T2.MakeId where T1.Horsepower < 1
+extra gold: SELECT T2.MakeId ,  T2.Make FROM CARS_DATA AS T1 JOIN CAR_NAMES AS T2 ON T1.Id  =  T2.MakeId WHERE T1.Horsepower  >  (SELECT min(Horsepower) FROM CARS_DATA) AND T1.Cylinders  <=  3;
+
+extra pred: select max ( Horsepower ) from cars_data union select max ( Horsepower ) from cars_data where Cylinders < 1 )
+extra gold: SELECT mpg FROM CARS_DATA WHERE Cylinders  =  8 OR YEAR  <  1980 ORDER BY mpg DESC LIMIT 1;
+
+extra pred: select max ( MPG ) from cars_data where Cylinders < 1 or Year < 1
+extra gold: SELECT mpg FROM CARS_DATA WHERE Cylinders  =  8 OR YEAR  <  1980 ORDER BY mpg DESC LIMIT 1;
+
+extra pred: select Model from car_names where Model > 1 except select Model from car_names where Model = 1
+extra gold: SELECT DISTINCT T1.model FROM MODEL_LIST AS T1 JOIN CAR_NAMES AS T2 ON T1.Model  =  T2.Model JOIN CARS_DATA AS T3 ON T2.MakeId  =  T3.Id JOIN CAR_MAKERS AS T4 ON T1.Maker  =  T4.Id WHERE T3.weight  <  3500 AND T4.FullName != 'Ford Motor Company';
+
+extra pred: select T1.Model from model_list as T1 join car_names as T2 on T1.Model = T2.Model join cars_data as T3 on T2.MakeId = T3.Id where T3.Weight > 1 except select T5.Model from car_makers as T4 join model_list as T5 on T4.Id = T5.Maker where T4.FullName = 1
+extra gold: SELECT DISTINCT T1.model FROM MODEL_LIST AS T1 JOIN CAR_NAMES AS T2 ON T1.Model  =  T2.Model JOIN CARS_DATA AS T3 ON T2.MakeId  =  T3.Id JOIN CAR_MAKERS AS T4 ON T1.Maker  =  T4.Id WHERE T3.weight  <  3500 AND T4.FullName != 'Ford Motor Company';
+
+hard pred: select CountryName from countries group by CountryName having count ( * ) > = 1
+hard gold: SELECT CountryName FROM countries EXCEPT SELECT T1.CountryName FROM countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.countryId  =  T2.Country;
+
+hard pred: select CountryName from countries where CountryId not in ( select Id from car_makers )
+hard gold: SELECT CountryName FROM countries EXCEPT SELECT T1.CountryName FROM countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.countryId  =  T2.Country;
+
+extra pred: select Id , Maker from car_makers group by Id having count ( * ) > = 1
+extra gold: SELECT T1.Id ,  T1.Maker FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id HAVING count(*)  >=  2 INTERSECT SELECT T1.Id ,  T1.Maker FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker JOIN CAR_NAMES AS T3 ON T2.model  =  T3.model GROUP BY T1.Id HAVING count(*)  >  3;
+
+extra pred: select Id , Maker from car_makers group by Id having count ( * ) > 1
+extra gold: SELECT T1.Id ,  T1.Maker FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id HAVING count(*)  >=  2 INTERSECT SELECT T1.Id ,  T1.Maker FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker JOIN CAR_NAMES AS T3 ON T2.model  =  T3.model GROUP BY T1.Id HAVING count(*)  >  3;
+
+extra pred: select T1.CountryId , T1.CountryName from countries as T1 join car_makers as T2 on T1.CountryId = T2.Country join model_list as T3 on T2.Id = T3.Maker join car_names as T4 on T3.Model = T4.Model where T4.Make > 1 or T4.Make = 1
+extra gold: SELECT T1.countryId ,  T1.CountryName FROM Countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.countryId HAVING count(*)  >  3 UNION SELECT T1.countryId ,  T1.CountryName FROM Countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country JOIN MODEL_LIST AS T3 ON T2.Id  =  T3.Maker WHERE T3.Model  =  'fiat';
+
+extra pred: select CountryId , CountryName from countries group by CountryName having count ( * ) > 1 union select T1.CountryId , T1.CountryName from countries as T1 join car_makers as T2 on T1.CountryId = T2.Country join model_list as T3 on T2.Id = T3.Maker join car_names as T4 on T3.Model = T4.Model where T4.Make = 1
+extra gold: SELECT T1.countryId ,  T1.CountryName FROM Countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country GROUP BY T1.countryId HAVING count(*)  >  3 UNION SELECT T1.countryId ,  T1.CountryName FROM Countries AS T1 JOIN CAR_MAKERS AS T2 ON T1.CountryId  =  T2.Country JOIN MODEL_LIST AS T3 ON T2.Id  =  T3.Maker WHERE T3.Model  =  'fiat';
+
+easy pred: select AirportName from airports where AirportName = 1
+easy gold: SELECT AirportName FROM AIRPORTS WHERE AirportCode  =  "AKO"
+
+easy pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1
+easy gold: SELECT count(*) FROM FLIGHTS WHERE SourceAirport  =  "APG"
+
+easy pred: select count ( * ) from flights where FlightNo = 1
+easy gold: SELECT count(*) FROM FLIGHTS WHERE DestAirport  =  "ATO"
+
+easy pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.City = 1
+easy gold: SELECT count(*) FROM FLIGHTS WHERE DestAirport  =  "ATO"
+
+hard pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.City = 1 and T1.DestAirport = 1
+hard gold: SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRPORTS AS T3 ON T1.SourceAirport  =  T3.AirportCode WHERE T2.City  =  "Ashley" AND T3.City  =  "Aberdeen"
+
+hard pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.City = 1 and T2.City = 1
+hard gold: SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRPORTS AS T3 ON T1.SourceAirport  =  T3.AirportCode WHERE T2.City  =  "Ashley" AND T3.City  =  "Aberdeen"
+
+medium pred: select count ( * ) from airlines as T1 join airports as T2 where T2.AirportName = 1 and T1.Airline = 1
+medium gold: SELECT count(*) FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T2.Airline  =  T1.uid WHERE T1.Airline  =  "United Airlines" AND T2.DestAirport  =  "ASY"
+
+medium pred: select count ( * ) from airlines as T1 join airports as T2 where T2.AirportName = 1 and T1.Airline = 1
+medium gold: SELECT count(*) FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T2.Airline  =  T1.uid WHERE T1.Airline  =  "United Airlines" AND T2.DestAirport  =  "ASY"
+
+medium pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1 and T1.SourceAirport = 1
+medium gold: SELECT count(*) FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T2.Airline  =  T1.uid WHERE T1.Airline  =  "United Airlines" AND T2.SourceAirport  =  "AHD"
+
+medium pred: select count ( * ) from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1 and T1.DestAirport = 1
+medium gold: SELECT count(*) FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T2.Airline  =  T1.uid WHERE T1.Airline  =  "United Airlines" AND T2.SourceAirport  =  "AHD"
+
+hard pred: select count ( * ) from airports where City = 1 and City = 1
+hard gold: SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRLINES AS T3 ON T3.uid  =  T1.Airline WHERE T2.City  =  "Aberdeen" AND T3.Airline  =  "United Airlines"
+
+hard pred: select count ( * ) from airlines as T1 join airports as T2 where T2.City = 1 and T1.Country = 1
+hard gold: SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRPORTS AS T2 ON T1.DestAirport  =  T2.AirportCode JOIN AIRLINES AS T3 ON T3.uid  =  T1.Airline WHERE T2.City  =  "Aberdeen" AND T3.Airline  =  "United Airlines"
+
+extra pred: select City from airports group by City order by count ( * ) desc limit 1
+extra gold: SELECT T1.City FROM AIRPORTS AS T1 JOIN FLIGHTS AS T2 ON T1.AirportCode  =  T2.DestAirport GROUP BY T1.City ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select City from airports group by City order by count ( * ) desc limit 1
+extra gold: SELECT T1.City FROM AIRPORTS AS T1 JOIN FLIGHTS AS T2 ON T1.AirportCode  =  T2.SourceAirport GROUP BY T1.City ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.Airline from airlines as T1 join flights as T2 group by T2.Airline order by count ( * ) desc limit 1
+extra gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.Abbreviation , T1.Country from airlines as T1 join flights as T2 group by T2.Airline order by count ( * ) limit 1
+extra gold: SELECT T1.Abbreviation ,  T1.Country FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline ORDER BY count(*) LIMIT 1
+
+extra pred: select T1.Abbreviation , T1.Country from airlines as T1 join flights as T2 where T1.Country = 1 group by T1.Abbreviation order by count ( * ) desc limit 1
+extra gold: SELECT T1.Abbreviation ,  T1.Country FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline ORDER BY count(*) LIMIT 1
+
+medium pred: select T1.Airline from airlines as T1 join airports as T2 where T2.AirportName = 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "AHD"
+
+medium pred: select T1.Airline from airlines as T1 join airports as T2 where T2.AirportName = 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.DestAirport  =  "AHD"
+
+medium pred: select Airline from flights where DestAirport = 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.DestAirport  =  "AHD"
+
+extra pred: select T1.Airline from airlines as T1 join airports as T2 where T2.AirportName = 1 intersect select T3.Airline from airlines as T3 join airports as T4 where T4.AirportName = 1
+extra gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "APG" INTERSECT SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "CVO"
+
+extra pred: select T1.Airline from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1 intersect select T3.Airline from flights as T3 join airports as T4 on T3.DestAirport = T4.AirportCode where T4.AirportName = 1
+extra gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "APG" INTERSECT SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "CVO"
+
+extra pred: select T1.Airline from airlines as T1 join airports as T2 where T2.AirportName = 1 except select T3.Airline from airlines as T3 join airports as T4 where T4.AirportName = 1
+extra gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "CVO" EXCEPT SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "APG"
+
+extra pred: select T1.Airline from airlines as T1 join airports as T2 where T2.AirportName = 1 except select T3.Airline from flights as T3 join airports as T4 on T3.DestAirport = T4.AirportCode where T4.AirportName = 1
+extra gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "CVO" EXCEPT SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline WHERE T2.SourceAirport  =  "APG"
+
+medium pred: select T1.uid from airlines as T1 join flights as T2 group by T2.Airline having count ( * ) > = 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline HAVING count(*)  >  10
+
+medium pred: select Airline from flights group by Airline having count ( * ) > = 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline HAVING count(*)  >  10
+
+medium pred: select T1.Airline from airlines as T1 join flights as T2 group by T2.Airline having count ( * ) < 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline HAVING count(*)  <  200
+
+medium pred: select T1.Airline from airlines as T1 join flights as T2 where T2.FlightNo < 1
+medium gold: SELECT T1.Airline FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T1.uid  =  T2.Airline GROUP BY T1.Airline HAVING count(*)  <  200
+
+easy pred: select T1.FlightNo from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1
+easy gold: SELECT FlightNo FROM FLIGHTS WHERE SourceAirport  =  "APG"
+
+easy pred: select T1.FlightNo from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.AirportName = 1
+easy gold: SELECT FlightNo FROM FLIGHTS WHERE DestAirport  =  "APG"
+
+easy pred: select T1.FlightNo from flights as T1 join airports as T2 on T1.DestAirport = T2.AirportCode where T2.City = 1
+easy gold: SELECT FlightNo FROM FLIGHTS WHERE DestAirport  =  "APG"
+
+hard pred: select count ( * ) from airports where City = 1 or City = 1
+hard gold: SELECT count(*) FROM Flights AS T1 JOIN Airports AS T2 ON T1.DestAirport  =  T2.AirportCode WHERE T2.city  =  "Aberdeen" OR T2.city  =  "Abilene"
+
+hard pred: select AirportName from airports where AirportCode not in ( select SourceAirport from flights )
+hard gold: SELECT AirportName FROM Airports WHERE AirportCode NOT IN (SELECT SourceAirport FROM Flights UNION SELECT DestAirport FROM Flights)
+
+hard pred: select AirportName from airports except select DestAirport from flights
+hard gold: SELECT AirportName FROM Airports WHERE AirportCode NOT IN (SELECT SourceAirport FROM Flights UNION SELECT DestAirport FROM Flights)
+
+medium pred: select Manager_name , District from shop group by Shop_ID order by count ( * ) desc limit 1
+medium gold: SELECT manager_name ,  district FROM shop ORDER BY number_products DESC LIMIT 1
+
+hard pred: select T2.Name from hiring as T1 join employee as T2 on T1.Employee_ID = T2.Employee_ID order by T1.Is_full_time desc limit 1
+hard gold: SELECT t1.name FROM employee AS t1 JOIN evaluation AS t2 ON t1.Employee_ID  =  t2.Employee_ID ORDER BY t2.bonus DESC LIMIT 1
+
+extra pred: select Name from shop group by Name order by count ( * ) desc limit 1
+extra gold: SELECT t2.name FROM hiring AS t1 JOIN shop AS t2 ON t1.shop_id  =  t2.shop_id GROUP BY t1.shop_id ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select Name from shop where Shop_ID not in ( select Shop_ID from shop )
+hard gold: SELECT name FROM shop WHERE shop_id NOT IN (SELECT shop_id FROM hiring)
+
+medium pred: select Name , count ( * ) from shop group by Name
+medium gold: SELECT count(*) ,  t2.name FROM hiring AS t1 JOIN shop AS t2 ON t1.shop_id  =  t2.shop_id GROUP BY t2.name
+
+medium pred: select Name , count ( * ) from shop group by Name
+medium gold: SELECT count(*) ,  t2.name FROM hiring AS t1 JOIN shop AS t2 ON t1.shop_id  =  t2.shop_id GROUP BY t2.name
+
+easy pred: select T1.Template_ID from Documents as T1 join Templates as T2 on T1.Template_ID = T2.Template_ID group by T1.Template_ID having count ( * ) > 1
+easy gold: SELECT template_id FROM Documents GROUP BY template_id HAVING count(*)  >  1
+
+easy pred: select T1.Template_ID from Documents as T1 join Templates as T2 on T1.Template_ID = T2.Template_ID group by T1.Template_ID having count ( * ) > 1
+easy gold: SELECT template_id FROM Documents GROUP BY template_id HAVING count(*)  >  1
+
+medium pred: select Version_Number , Template_Type_Code from Templates where Date_Effective_From > 1
+medium gold: SELECT version_number ,  template_type_code FROM Templates WHERE version_number  >  5
+
+medium pred: select T2.Template_Type_Code , count ( * ) from Ref_Template_Types as T1 join Templates as T2 on T1.Template_Type_Code = T2.Template_Type_Code group by T2.Template_Type_Code
+medium gold: SELECT template_type_code ,  count(*) FROM Templates GROUP BY template_type_code
+
+medium pred: select min ( Version_Number ) , Template_Type_Code from Templates group by Template_Type_Code order by Template_Type_Code limit 1
+medium gold: SELECT min(Version_Number) ,  template_type_code FROM Templates
+
+medium pred: select min ( Version_Number ) , Template_Type_Code from Templates group by Template_Type_Code
+medium gold: SELECT min(Version_Number) ,  template_type_code FROM Templates
+
+hard pred: select Template_Type_Code from Ref_Template_Types except select Template_Type_Code from Templates
+hard gold: SELECT template_type_code FROM Templates EXCEPT SELECT template_type_code FROM Templates AS T1 JOIN Documents AS T2 ON T1.template_id  =  T2.template_id
+
+hard pred: select Template_Type_Code from Ref_Template_Types except select Template_Type_Code from Templates
+hard gold: SELECT template_type_code FROM Templates EXCEPT SELECT template_type_code FROM Templates AS T1 JOIN Documents AS T2 ON T1.template_id  =  T2.template_id
+
+medium pred: select Template_Type_Description from Ref_Template_Types
+medium gold: SELECT DISTINCT T1.template_type_description FROM Ref_template_types AS T1 JOIN Templates AS T2 ON T1.template_type_code  = T2.template_type_code JOIN Documents AS T3 ON T2.Template_ID  =  T3.template_ID
+
+medium pred: select Document_Description from Documents
+medium gold: SELECT DISTINCT T1.template_type_description FROM Ref_template_types AS T1 JOIN Templates AS T2 ON T1.template_type_code  = T2.template_type_code JOIN Documents AS T3 ON T2.Template_ID  =  T3.template_ID
+
+medium pred: select count ( * ) from Documents where Document_Name = 1
+medium gold: SELECT count(*) FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_ID  =  T2.document_ID WHERE T2.document_name  =  'Summer Show'
+
+medium pred: select count ( * ) from Documents where Document_Name = 1
+medium gold: SELECT count(*) FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_ID  =  T2.document_ID WHERE T2.document_name  =  'Summer Show'
+
+medium pred: select Document_ID , count ( * ) from Documents group by Document_ID order by count ( * )
+medium gold: SELECT document_id ,  count(*) FROM Paragraphs GROUP BY document_id ORDER BY document_id
+
+eval_err_num:2
+medium pred: select T2.Document_ID , count ( * ) from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID order by count ( T1.* )
+medium gold: SELECT document_id ,  count(*) FROM Paragraphs GROUP BY document_id ORDER BY document_id
+
+medium pred: select Document_ID , Document_Name , count ( * ) from Documents group by Document_ID
+medium gold: SELECT T1.document_id ,  T2.document_name ,  count(*) FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_id  =  T2.document_id GROUP BY T1.document_id
+
+medium pred: select Document_ID , Document_Name , count ( * ) from Documents group by Document_ID
+medium gold: SELECT T1.document_id ,  T2.document_name ,  count(*) FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_id  =  T2.document_id GROUP BY T1.document_id
+
+easy pred: select T2.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID having count ( * ) > = 1
+easy gold: SELECT document_id FROM Paragraphs GROUP BY document_id HAVING count(*)  >=  2
+
+easy pred: select T2.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID having count ( * ) > = 1
+easy gold: SELECT document_id FROM Paragraphs GROUP BY document_id HAVING count(*)  >=  2
+
+extra pred: select Document_ID , Document_Name from Documents group by Document_ID order by count ( * ) desc limit 1
+extra gold: SELECT T1.document_id ,  T2.document_name FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_id  =  T2.document_id GROUP BY T1.document_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select Document_ID , Document_Name from Documents group by Document_ID order by count ( * ) desc limit 1
+extra gold: SELECT T1.document_id ,  T2.document_name FROM Paragraphs AS T1 JOIN Documents AS T2 ON T1.document_id  =  T2.document_id GROUP BY T1.document_id ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select T2.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID order by count ( * ) asc limit 1
+hard gold: SELECT document_id FROM Paragraphs GROUP BY document_id ORDER BY count(*) ASC LIMIT 1
+
+easy pred: select T2.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID having count ( * ) between 1 and 1
+easy gold: SELECT document_id FROM Paragraphs GROUP BY document_id HAVING count(*) BETWEEN 1 AND 2
+
+easy pred: select T2.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID group by T2.Document_ID having count ( * ) between 1 and 1
+easy gold: SELECT document_id FROM Paragraphs GROUP BY document_id HAVING count(*) BETWEEN 1 AND 2
+
+hard pred: select T1.Document_ID from Documents as T1 join Paragraphs as T2 on T1.Document_ID = T2.Document_ID where T2.Paragraph_Text = 1 intersect select Document_ID from Paragraphs where Paragraph_Text = 1
+hard gold: SELECT document_id FROM Paragraphs WHERE paragraph_text  =  'Brazil' INTERSECT SELECT document_id FROM Paragraphs WHERE paragraph_text  =  'Ireland'
+
+medium pred: select Name , count ( * ) from teacher group by Teacher_ID
+medium gold: SELECT T2.Name ,  COUNT(*) FROM course_arrange AS T1 JOIN teacher AS T2 ON T1.Teacher_ID  =  T2.Teacher_ID GROUP BY T2.Name
+
+medium pred: select Name , count ( * ) from teacher group by Name
+medium gold: SELECT T2.Name ,  COUNT(*) FROM course_arrange AS T1 JOIN teacher AS T2 ON T1.Teacher_ID  =  T2.Teacher_ID GROUP BY T2.Name
+
+medium pred: select Name from teacher group by Teacher_ID having count ( * ) > = 1
+medium gold: SELECT T2.Name FROM course_arrange AS T1 JOIN teacher AS T2 ON T1.Teacher_ID  =  T2.Teacher_ID GROUP BY T2.Name HAVING COUNT(*)  >=  2
+
+medium pred: select Name from teacher group by Teacher_ID having count ( * ) > = 1
+medium gold: SELECT T2.Name FROM course_arrange AS T1 JOIN teacher AS T2 ON T1.Teacher_ID  =  T2.Teacher_ID GROUP BY T2.Name HAVING COUNT(*)  >=  2
+
+easy pred: select count ( * ) from visit as T1 join visitor as T2 on T1.visitor_ID = T2.ID where T2.Age < 1
+easy gold: SELECT count(*) FROM visitor WHERE age  <  30
+
+medium pred: select Name from visitor where Level_of_membership > 1 order by Name
+medium gold: SELECT name FROM visitor WHERE Level_of_membership  >  4 ORDER BY Level_of_membership DESC
+
+easy pred: select avg ( Age ) from visitor where Level_of_membership < 1
+easy gold: SELECT avg(age) FROM visitor WHERE Level_of_membership  <=  4
+
+medium pred: select Name , Level_of_membership from visitor where Age > 1 order by Age
+medium gold: SELECT name ,  Level_of_membership FROM visitor WHERE Level_of_membership  >  4 ORDER BY age DESC
+
+medium pred: select T1.Museum_ID , T2.Name , T1.Museum_ID from visit as T1 join visitor as T2 on T1.visitor_ID = T2.ID group by T1.Museum_ID having count ( * ) > 1
+medium gold: SELECT t1.id ,  t1.name ,  t1.age FROM visitor AS t1 JOIN visit AS t2 ON t1.id  =  t2.visitor_id GROUP BY t1.id HAVING count(*)  >  1
+
+hard pred: select T2.Name , T2.Age from visit as T1 join visitor as T2 on T1.visitor_ID = T2.ID group by T2.ID order by sum ( T1.Num_of_Ticket ) desc limit 1
+hard gold: SELECT t1.name ,  t1.age FROM visitor AS t1 JOIN visit AS t2 ON t1.id  =  t2.visitor_id ORDER BY t2.num_of_ticket DESC LIMIT 1
+
+medium pred: select sum ( T1.Num_of_Ticket ) from visit as T1 join visitor as T2 on T1.visitor_ID = T2.ID where T2.Level_of_membership = 1
+medium gold: SELECT sum(t2.Total_spent) FROM visitor AS t1 JOIN visit AS t2 ON t1.id  =  t2.visitor_id WHERE t1.Level_of_membership  =  1
+
+extra pred: select count ( * ) from visit where Museum_ID not in ( select Museum_ID from museum where Open_Year > 1 )
+extra gold: SELECT count(*) FROM visitor WHERE id NOT IN (SELECT t2.visitor_id FROM museum AS t1 JOIN visit AS t2 ON t1.Museum_ID  =  t2.Museum_ID WHERE t1.open_year  >  2010)
+
+medium pred: select avg ( winner_age ) , winner_id from matches group by winner_id
+medium gold: SELECT avg(loser_age) ,  avg(winner_age) FROM matches
+
+medium pred: select avg ( loser_age ) , loser_name from matches group by winner_id
+medium gold: SELECT avg(loser_age) ,  avg(winner_age) FROM matches
+
+easy pred: select loser_rank from matches order by loser_rank_points desc limit 1
+easy gold: SELECT min(loser_rank) FROM matches
+
+easy pred: select count ( winner_name ) from matches
+easy gold: SELECT count(DISTINCT loser_name) FROM matches
+
+easy pred: select tourney_name from matches group by tourney_id having count ( * ) > 1
+easy gold: SELECT tourney_name FROM matches GROUP BY tourney_name HAVING count(*)  >  10
+
+hard pred: select T1.first_name from players as T1 join matches as T2 on T1.player_id = T2.winner_id where T2.year = 1 intersect select T3.first_name from players as T3 join matches as T4 on T3.player_id = T4.winner_id where T4.year = 1
+hard gold: SELECT winner_name FROM matches WHERE YEAR  =  2013 INTERSECT SELECT winner_name FROM matches WHERE YEAR  =  2016
+
+extra pred: select T1.first_name , T1.first_name from players as T1 join matches as T2 on T1.player_id = T2.winner_id where T2.tourney_name = 1 intersect select T3.first_name , T3.first_name from players as T3 join matches as T4 on T3.player_id = T4.winner_id where T4.tourney_name = 1
+extra gold: SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN matches AS T2 ON T1.player_id  =  T2.winner_id WHERE T2.tourney_name  =  'WTA Championships' INTERSECT SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN matches AS T2 ON T1.player_id  =  T2.winner_id WHERE T2.tourney_name  =  'Australian Open'
+
+extra pred: select T1.first_name , T1.country_code from players as T1 join rankings as T2 on T1.player_id = T2.player_id where T2.ranking = 1 intersect select T3.first_name , T3.country_code from players as T3 join rankings as T4 on T3.player_id = T4.player_id where T4.ranking = 1
+extra gold: SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN matches AS T2 ON T1.player_id  =  T2.winner_id WHERE T2.tourney_name  =  'WTA Championships' INTERSECT SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN matches AS T2 ON T1.player_id  =  T2.winner_id WHERE T2.tourney_name  =  'Australian Open'
+
+medium pred: select T1.first_name , T1.country_code from players as T1 join matches as T2 on T1.player_id = T2.winner_id order by T2.loser_age desc limit 1
+medium gold: SELECT first_name ,  country_code FROM players ORDER BY birth_date LIMIT 1
+
+medium pred: select T1.first_name , T1.country_code from players as T1 join matches as T2 on T1.player_id = T2.winner_id order by T2.loser_age desc limit 1
+medium gold: SELECT first_name ,  country_code FROM players ORDER BY birth_date LIMIT 1
+
+hard pred: select T1.first_name , T1.country_code from players as T1 join rankings as T2 on T1.player_id = T2.player_id group by T2.player_id order by count ( * ) desc limit 1
+hard gold: SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN rankings AS T2 ON T1.player_id  =  T2.player_id ORDER BY T2.tours DESC LIMIT 1
+
+hard pred: select T1.first_name , T1.country_code from players as T1 join rankings as T2 on T1.player_id = T2.player_id group by T2.player_id order by count ( * ) desc limit 1
+hard gold: SELECT T1.country_code ,  T1.first_name FROM players AS T1 JOIN rankings AS T2 ON T1.player_id  =  T2.player_id ORDER BY T2.tours DESC LIMIT 1
+
+hard pred: select winner_name , winner_rank_points from matches order by loser_rank_points desc limit 1
+hard gold: SELECT winner_name ,  winner_rank_points FROM matches GROUP BY winner_name ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select winner_name from matches where tourney_name = 1 order by loser_rank_points desc limit 1
+hard gold: SELECT winner_name FROM matches WHERE tourney_name  =  'Australian Open' ORDER BY winner_rank_points DESC LIMIT 1
+
+hard pred: select T3.winner_name from rankings as T1 join players as T2 on T1.player_id = T2.player_id join matches as T3 on T2.player_id = T3.winner_id where T1.ranking_points = 1 order by T3.loser_rank_points desc limit 1
+hard gold: SELECT winner_name FROM matches WHERE tourney_name  =  'Australian Open' ORDER BY winner_rank_points DESC LIMIT 1
+
+medium pred: select loser_name , loser_name from matches order by minutes desc limit 1
+medium gold: SELECT winner_name ,  loser_name FROM matches ORDER BY minutes DESC LIMIT 1
+
+medium pred: select T1.first_name , avg ( T2.ranking_points ) from players as T1 join rankings as T2 on T1.player_id = T2.player_id group by T1.first_name
+medium gold: SELECT avg(ranking) ,  T1.first_name FROM players AS T1 JOIN rankings AS T2 ON T1.player_id  =  T2.player_id GROUP BY T1.first_name
+
+easy pred: select country_code from players where country_code > 1
+easy gold: SELECT country_code FROM players GROUP BY country_code HAVING count(*)  >  50
+
+easy pred: select country_code from players where country_code > 1
+easy gold: SELECT country_code FROM players GROUP BY country_code HAVING count(*)  >  50
+
+medium pred: select ranking_date , count ( * ) from rankings group by ranking_date
+medium gold: SELECT sum(tours) ,  ranking_date FROM rankings GROUP BY ranking_date
+
+medium pred: select ranking_date , count ( * ) from rankings group by ranking_date
+medium gold: SELECT sum(tours) ,  ranking_date FROM rankings GROUP BY ranking_date
+
+medium pred: select count ( winner_hand ) from matches where loser_hand = 1 and loser_hand != 1
+medium gold: SELECT count(DISTINCT winner_name) FROM matches WHERE tourney_name  =  'WTA Championships' AND winner_hand  =  'L'
+
+medium pred: select count ( * ) from players as T1 join matches as T2 on T1.player_id = T2.winner_id where T1.hand = 1 and T2.loser_hand = 1
+medium gold: SELECT count(DISTINCT winner_name) FROM matches WHERE tourney_name  =  'WTA Championships' AND winner_hand  =  'L'
+
+hard pred: select first_name , birth_date , country_code from players group by player_id order by count ( * ) desc limit 1
+hard gold: SELECT T1.first_name ,  T1.country_code ,  T1.birth_date FROM players AS T1 JOIN matches AS T2 ON T1.player_id  =  T2.winner_id ORDER BY T2.winner_rank_points DESC LIMIT 1
+
+easy pred: select count ( * ) from ship where lost_in_battle = 1
+easy gold: SELECT count(*) FROM ship WHERE disposition_of_ship  =  'Captured'
+
+medium pred: select name , date , result from battle
+medium gold: SELECT name ,  date FROM battle
+
+medium pred: select max ( killed ) , min ( killed ) , killed from death group by killed
+medium gold: SELECT max(killed) ,  min(killed) FROM death
+
+easy pred: select avg ( injured ) , sum ( injured ) from death
+easy gold: SELECT avg(injured) FROM death
+
+extra pred: select id , name from ship group by id order by count ( * ) desc limit 1
+extra gold: SELECT T2.id ,  T2.name FROM death AS T1 JOIN ship AS t2 ON T1.caused_by_ship_id  =  T2.id GROUP BY T2.id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select count ( * ) from battle where id not in ( select T2.id from ship as T1 join battle as T2 on T1.lost_in_battle = T2.id where T1.tonnage = 1 )
+extra gold: SELECT count(*) FROM battle WHERE id NOT IN ( SELECT lost_in_battle FROM ship WHERE tonnage  =  '225' );
+
+extra pred: select T2.name , T2.date from ship as T1 join battle as T2 on T1.lost_in_battle = T2.id where T1.name = 1 and T1.name = 1
+extra gold: SELECT T1.name ,  T1.date FROM battle AS T1 JOIN ship AS T2 ON T1.id  =  T2.lost_in_battle WHERE T2.name  =  'Lettice' INTERSECT SELECT T1.name ,  T1.date FROM battle AS T1 JOIN ship AS T2 ON T1.id  =  T2.lost_in_battle WHERE T2.name  =  'HMS Atalanta'
+
+extra pred: select name , bulgarian_commander , bulgarian_commander from battle where id not in ( select id from battle where latin_commander = 1 )
+extra gold: SELECT name ,  RESULT ,  bulgarian_commander FROM battle EXCEPT SELECT T1.name ,  T1.result ,  T1.bulgarian_commander FROM battle AS T1 JOIN ship AS T2 ON T1.id  =  T2.lost_in_battle WHERE T2.location  =  'English Channel'
+
+medium pred: select note from death where killed like 1
+medium gold: SELECT note FROM death WHERE note LIKE '%East%'
+
+medium pred: select line_1 from Addresses where line_1 = 1 and line_3 != 1
+medium gold: SELECT line_1 ,  line_2 FROM addresses
+
+medium pred: select line_1 , line_3 from Addresses
+medium gold: SELECT line_1 ,  line_2 FROM addresses
+
+extra pred: select T1.department_name , T2.department_id from Departments as T1 join Degree_Programs as T2 on T1.department_id = T2.department_id group by T1.department_id order by sum ( T2.degree_summary_name ) desc limit 1
+extra gold: SELECT T2.department_name ,  T1.department_id FROM Degree_Programs AS T1 JOIN Departments AS T2 ON T1.department_id  =  T2.department_id GROUP BY T1.department_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.department_name , count ( * ) from Departments as T1 join Degree_Programs as T2 on T1.department_id = T2.department_id group by T2.department_id order by count ( * ) desc limit 1
+extra gold: SELECT T2.department_name ,  T1.department_id FROM Degree_Programs AS T1 JOIN Departments AS T2 ON T1.department_id  =  T2.department_id GROUP BY T1.department_id ORDER BY count(*) DESC LIMIT 1
+
+easy pred: select count ( * ) from Departments
+easy gold: SELECT count(DISTINCT department_id) FROM Degree_Programs
+
+easy pred: select count ( department_name ) from Departments
+easy gold: SELECT count(DISTINCT department_id) FROM Degree_Programs
+
+easy pred: select count ( degree_program_id ) from Degree_Programs
+easy gold: SELECT count(DISTINCT degree_summary_name) FROM Degree_Programs
+
+medium pred: select count ( * ) from Departments where department_name = 1
+medium gold: SELECT count(*) FROM Departments AS T1 JOIN Degree_Programs AS T2 ON T1.department_id  =  T2.department_id WHERE T1.department_name  =  'engineer'
+
+medium pred: select count ( * ) from Departments where department_name = 1
+medium gold: SELECT count(*) FROM Departments AS T1 JOIN Degree_Programs AS T2 ON T1.department_id  =  T2.department_id WHERE T1.department_name  =  'engineer'
+
+medium pred: select T1.course_name , T2.course_id from Courses as T1 join Sections as T2 on T1.course_id = T2.course_id group by T2.course_id having count ( * ) < 1
+medium gold: SELECT T1.course_name ,  T1.course_id FROM Courses AS T1 JOIN Sections AS T2 ON T1.course_id  =  T2.course_id GROUP BY T1.course_id HAVING count(*)  <=  2
+
+extra pred: select semester_name , semester_id from Semesters group by semester_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.semester_name ,  T1.semester_id FROM Semesters AS T1 JOIN Student_Enrolment AS T2 ON T1.semester_id  =  T2.semester_id GROUP BY T1.semester_id ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select T3.first_name , T3.middle_name , T1.degree_program_id from Degree_Programs as T1 join Student_Enrolment as T2 on T1.degree_program_id = T2.degree_program_id join Students as T3 on T2.student_id = T3.student_id join Semesters as T4 on T2.semester_id = T4.semester_id group by T4.semester_id having count ( * ) = 1
+medium gold: SELECT T1.first_name ,  T1.middle_name ,  T1.last_name ,  T1.student_id FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id GROUP BY T1.student_id HAVING count(*)  =  2
+
+medium pred: select T2.first_name , T2.middle_name , T2.last_name , T1.semester_id from Student_Enrolment as T1 join Students as T2 on T1.student_id = T2.student_id join Semesters as T3 on T1.semester_id = T3.semester_id group by T3.semester_id having count ( * ) = 1
+medium gold: SELECT T1.first_name ,  T1.middle_name ,  T1.last_name ,  T1.student_id FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id GROUP BY T1.student_id HAVING count(*)  =  2
+
+hard pred: select T2.first_name , T2.middle_name , T2.last_name from Student_Enrolment as T1 join Students as T2 on T1.student_id = T2.student_id where T1.degree_program_id = 1
+hard gold: SELECT DISTINCT T1.first_name ,  T1.middle_name ,  T1.last_name FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id JOIN Degree_Programs AS T3 ON T2.degree_program_id  =  T3.degree_program_id WHERE T3.degree_summary_name  =  'Bachelor'
+
+hard pred: select T3.first_name , T3.middle_name , T3.last_name from Degree_Programs as T1 join Student_Enrolment as T2 on T1.degree_program_id = T2.degree_program_id join Students as T3 on T2.student_id = T3.student_id where T1.degree_program_id = 1
+hard gold: SELECT DISTINCT T1.first_name ,  T1.middle_name ,  T1.last_name FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id JOIN Degree_Programs AS T3 ON T2.degree_program_id  =  T3.degree_program_id WHERE T3.degree_summary_name  =  'Bachelor'
+
+extra pred: select T2.degree_program_id from Students as T1 join Student_Enrolment as T2 on T1.student_id = T2.student_id group by T2.degree_program_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.degree_summary_name FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id GROUP BY T1.degree_summary_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select degree_summary_name from Degree_Programs group by degree_summary_name order by count ( * ) desc limit 1
+extra gold: SELECT T1.degree_summary_name FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id GROUP BY T1.degree_summary_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T3.student_enrolment_id , T1.course_description from Courses as T1 join Student_Enrolment_Courses as T2 on T1.course_id = T2.course_id join Student_Enrolment as T3 on T2.student_enrolment_id = T3.student_enrolment_id join Students as T4 on T3.student_id = T4.student_id group by T4.student_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.degree_program_id ,  T1.degree_summary_name FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id GROUP BY T1.degree_program_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.degree_program_id , T1.degree_summary_description from Degree_Programs as T1 join Student_Enrolment as T2 on T1.degree_program_id = T2.degree_program_id group by T2.degree_program_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.degree_program_id ,  T1.degree_summary_name FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id GROUP BY T1.degree_program_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select student_id , last_name , count ( * ) from Students group by student_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.student_id ,  T1.first_name ,  T1.middle_name ,  T1.last_name ,  count(*) ,  T1.student_id FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select first_name , middle_name , last_name , count ( * ) from Students group by student_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.student_id ,  T1.first_name ,  T1.middle_name ,  T1.last_name ,  count(*) ,  T1.student_id FROM Students AS T1 JOIN Student_Enrolment AS T2 ON T1.student_id  =  T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+easy pred: select course_name from Courses
+easy gold: SELECT DISTINCT T1.course_name FROM Courses AS T1 JOIN Student_Enrolment_Courses AS T2 ON T1.course_id  =  T2.course_id
+
+easy pred: select course_name from Courses
+easy gold: SELECT DISTINCT T1.course_name FROM Courses AS T1 JOIN Student_Enrolment_Courses AS T2 ON T1.course_id  =  T2.course_id
+
+extra pred: select course_name from Courses group by course_name order by count ( * ) desc limit 1
+extra gold: SELECT  T1.course_name FROM Courses AS T1 JOIN Student_Enrolment_Courses AS T2 ON T1.course_id  =  T2.course_id GROUP BY T1.course_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select course_name from Courses group by course_name order by count ( * ) desc limit 1
+extra gold: SELECT  T1.course_name FROM Courses AS T1 JOIN Student_Enrolment_Courses AS T2 ON T1.course_id  =  T2.course_id GROUP BY T1.course_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.last_name from Students as T1 join Addresses as T2 on T1.permanent_address_id = T2.address_id where T2.state_province_county = 1 except select T3.last_name from Students as T3 join Addresses as T4 on T3.permanent_address_id = T4.address_id where T4.state_province_county = 1
+extra gold: SELECT T1.last_name FROM Students AS T1 JOIN Addresses AS T2 ON T1.current_address_id  =  T2.address_id WHERE T2.state_province_county  =  'NorthCarolina' EXCEPT SELECT DISTINCT T3.last_name FROM Students AS T3 JOIN Student_Enrolment AS T4 ON T3.student_id  =  T4.student_id
+
+extra pred: select T1.last_name from Students as T1 join Addresses as T2 on T1.permanent_address_id = T2.address_id where T2.state_province_county = 1 except select T3.last_name from Students as T3 join Addresses as T4 on T3.permanent_address_id = T4.address_id where T4.state_province_county = 1
+extra gold: SELECT T1.last_name FROM Students AS T1 JOIN Addresses AS T2 ON T1.current_address_id  =  T2.address_id WHERE T2.state_province_county  =  'NorthCarolina' EXCEPT SELECT DISTINCT T3.last_name FROM Students AS T3 JOIN Student_Enrolment AS T4 ON T3.student_id  =  T4.student_id
+
+medium pred: select transcript_date , transcript_id from Transcripts group by transcript_id having count ( * ) > = 1
+medium gold: SELECT T2.transcript_date ,  T1.transcript_id FROM Transcript_Contents AS T1 JOIN Transcripts AS T2 ON T1.transcript_id  =  T2.transcript_id GROUP BY T1.transcript_id HAVING count(*)  >=  2
+
+medium pred: select transcript_date , transcript_id from Transcripts group by transcript_id having count ( * ) > = 1
+medium gold: SELECT T2.transcript_date ,  T1.transcript_id FROM Transcript_Contents AS T1 JOIN Transcripts AS T2 ON T1.transcript_id  =  T2.transcript_id GROUP BY T1.transcript_id HAVING count(*)  >=  2
+
+medium pred: select cell_mobile_number from Students where last_name = 1
+medium gold: SELECT cell_mobile_number FROM Students WHERE first_name  =  'Timmothy' AND last_name  =  'Ward'
+
+easy pred: select first_name from Students
+easy gold: SELECT first_name FROM Students WHERE current_address_id != permanent_address_id
+
+eval_err_num:3
+easy pred: select first_name from Students where permanent_address_id = ( select from Students ) permanent_address_id
+easy gold: SELECT first_name FROM Students WHERE current_address_id != permanent_address_id
+
+extra pred: select address_id , line_2 from Addresses group by address_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.address_id ,  T1.line_1 ,  T1.line_2 FROM Addresses AS T1 JOIN Students AS T2 ON T1.address_id  =  T2.current_address_id GROUP BY T1.address_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select address_id , line_1 , line_2 from Addresses group by address_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.address_id ,  T1.line_1 ,  T1.line_2 FROM Addresses AS T1 JOIN Students AS T2 ON T1.address_id  =  T2.current_address_id GROUP BY T1.address_id ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select count ( * ) , transcript_id from Transcripts group by transcript_id
+hard gold: SELECT count(*) ,  student_course_id FROM Transcript_Contents GROUP BY student_course_id ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select transcript_id , count ( * ) from Transcripts group by transcript_id order by count ( * ) desc limit 1
+hard gold: SELECT count(*) ,  student_course_id FROM Transcript_Contents GROUP BY student_course_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select transcript_id , count ( * ) from Transcripts group by transcript_id order by count ( * ) asc limit 1
+extra gold: SELECT T2.transcript_date ,  T1.transcript_id FROM Transcript_Contents AS T1 JOIN Transcripts AS T2 ON T1.transcript_id  =  T2.transcript_id GROUP BY T1.transcript_id ORDER BY count(*) ASC LIMIT 1
+
+extra pred: select transcript_date , transcript_id from Transcripts group by transcript_id order by count ( * ) asc limit 1
+extra gold: SELECT T2.transcript_date ,  T1.transcript_id FROM Transcript_Contents AS T1 JOIN Transcripts AS T2 ON T1.transcript_id  =  T2.transcript_id GROUP BY T1.transcript_id ORDER BY count(*) ASC LIMIT 1
+
+extra pred: select T3.semester_name from Degree_Programs as T1 join Student_Enrolment as T2 on T1.degree_program_id = T2.degree_program_id join Semesters as T3 on T2.semester_id = T3.semester_id where T1.degree_summary_name = 1 intersect select T5.semester_name from Student_Enrolment as T4 join Semesters as T5 on T4.semester_id = T5.semester_id where T4.degree_program_id = 1
+extra gold: SELECT DISTINCT T2.semester_id FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id WHERE degree_summary_name  =  'Master' INTERSECT SELECT DISTINCT T2.semester_id FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id WHERE degree_summary_name  =  'Bachelor'
+
+extra pred: select semester_id from Semesters where semester_name = 1 intersect select T3.semester_id from Degree_Programs as T1 join Student_Enrolment as T2 on T1.degree_program_id = T2.degree_program_id join Semesters as T3 on T2.semester_id = T3.semester_id where T1.degree_program_id = 1
+extra gold: SELECT DISTINCT T2.semester_id FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id WHERE degree_summary_name  =  'Master' INTERSECT SELECT DISTINCT T2.semester_id FROM Degree_Programs AS T1 JOIN Student_Enrolment AS T2 ON T1.degree_program_id  =  T2.degree_program_id WHERE degree_summary_name  =  'Bachelor'
+
+easy pred: select count ( address_id ) from Addresses
+easy gold: SELECT count(DISTINCT current_address_id) FROM Students
+
+easy pred: select city from Addresses
+easy gold: SELECT count(DISTINCT current_address_id) FROM Students
+
+extra pred: select first_name from Students where cell_mobile_number = 1 or cell_mobile_number = 1
+extra gold: SELECT T1.first_name FROM Students AS T1 JOIN Addresses AS T2 ON T1.permanent_address_id  =  T2.address_id WHERE T2.country  =  'Haiti' UNION SELECT first_name FROM Students WHERE cell_mobile_number  =  '09700166582'
+
+extra pred: select first_name from Students where cell_mobile_number = 1 or cell_mobile_number = 1
+extra gold: SELECT T1.first_name FROM Students AS T1 JOIN Addresses AS T2 ON T1.permanent_address_id  =  T2.address_id WHERE T2.country  =  'Haiti' UNION SELECT first_name FROM Students WHERE cell_mobile_number  =  '09700166582'
+
+medium pred: select count ( T1.series_name ) , T1.series_name from TV_Channel as T1 join TV_series as T2 on T1.id = T2.Channel group by T2.id
+medium gold: SELECT count(DISTINCT series_name) ,  count(DISTINCT content) FROM TV_Channel;
+
+medium pred: select count ( * ) , id from TV_series
+medium gold: SELECT count(DISTINCT series_name) ,  count(DISTINCT content) FROM TV_Channel;
+
+medium pred: select Production_code , Channel from Cartoon order by Original_air_date desc limit 1
+medium gold: SELECT production_code ,  channel FROM cartoon ORDER BY original_air_date LIMIT 1
+
+medium pred: select Title , Channel from Cartoon order by Original_air_date desc limit 1
+medium gold: SELECT production_code ,  channel FROM cartoon ORDER BY original_air_date LIMIT 1
+
+hard pred: select Country from TV_Channel except select Written_by from Cartoon where Written_by = 1
+hard gold: SELECT country FROM TV_Channel EXCEPT SELECT T1.country FROM TV_Channel AS T1 JOIN cartoon AS T2 ON T1.id = T2.Channel WHERE T2.written_by  =  'Todd Casey'
+
+medium pred: select Pixel_aspect_ratio_PAR , Country from TV_Channel where id not in ( select id from TV_Channel where Language = 1 )
+medium gold: SELECT Pixel_aspect_ratio_PAR ,  country FROM tv_channel WHERE LANGUAGE != 'English'
+
+easy pred: select id from TV_Channel group by id having count ( * ) > 1
+easy gold: SELECT id FROM tv_channel GROUP BY country HAVING count(*)  >  2
+
+hard pred: select id from TV_Channel except select id from Cartoon where Directed_by = 1
+hard gold: SELECT id FROM TV_Channel EXCEPT SELECT channel FROM cartoon WHERE directed_by  =  'Ben Jones'
+
+hard pred: select id from TV_Channel except select T1.id from TV_Channel as T1 join Cartoon as T2 on T1.id = T2.Channel where T2.Directed_by = 1
+hard gold: SELECT id FROM TV_Channel EXCEPT SELECT channel FROM cartoon WHERE directed_by  =  'Ben Jones'
+
+hard pred: select Package_Option from TV_Channel except select T1.Package_Option from TV_Channel as T1 join Cartoon as T2 on T1.id = T2.Channel where T2.Directed_by = 1
+hard gold: SELECT package_option FROM TV_Channel WHERE id NOT IN (SELECT channel FROM cartoon WHERE directed_by  =  'Ben Jones')
+
+hard pred: select Package_Option from TV_Channel except select T1.Package_Option from TV_Channel as T1 join Cartoon as T2 on T1.id = T2.Channel where T2.Directed_by = 1
+hard gold: SELECT package_option FROM TV_Channel WHERE id NOT IN (SELECT channel FROM cartoon WHERE directed_by  =  'Ben Jones')
+
+easy pred: select Final_Table_Made from poker_player where Earnings < 1 group by Final_Table_Made order by count ( * ) desc limit 1
+easy gold: SELECT max(Final_Table_Made) FROM poker_player WHERE Earnings  <  200000
+
+easy pred: select Name from people
+easy gold: SELECT T1.Name FROM people AS T1 JOIN poker_player AS T2 ON T1.People_ID  =  T2.People_ID
+
+easy pred: select Name from people
+easy gold: SELECT T1.Name FROM people AS T1 JOIN poker_player AS T2 ON T1.People_ID  =  T2.People_ID
+
+hard pred: select Name from people except select Name from people
+hard gold: SELECT Name FROM people WHERE People_ID NOT IN (SELECT People_ID FROM poker_player)
+
+medium pred: select contestant_number , contestant_name from CONTESTANTS order by contestant_number desc
+medium gold: SELECT contestant_number ,  contestant_name FROM contestants ORDER BY contestant_name DESC
+
+easy pred: select created from VOTES where state = 1
+easy gold: SELECT max(created) FROM votes WHERE state  =  'CA'
+
+medium pred: select contestant_number , contestant_name from CONTESTANTS group by contestant_name having count ( * ) > = 1
+medium gold: SELECT T1.contestant_number , T1.contestant_name FROM contestants AS T1 JOIN votes AS T2 ON T1.contestant_number  =  T2.contestant_number GROUP BY T1.contestant_number HAVING count(*)  >=  2
+
+extra pred: select T2.contestant_number , T2.contestant_name from VOTES as T1 join CONTESTANTS as T2 on T1.contestant_number = T2.contestant_number order by T1.vote_id asc limit 1
+extra gold: SELECT T1.contestant_number , T1.contestant_name FROM contestants AS T1 JOIN votes AS T2 ON T1.contestant_number  =  T2.contestant_number GROUP BY T1.contestant_number ORDER BY count(*) ASC LIMIT 1
+
+medium pred: select T1.created , T1.phone_number , T1.phone_number from VOTES as T1 join CONTESTANTS as T2 on T1.contestant_number = T2.contestant_number where T2.contestant_name = 1
+medium gold: SELECT T2.created ,  T2.state ,  T2.phone_number FROM contestants AS T1 JOIN votes AS T2 ON T1.contestant_number  =  T2.contestant_number WHERE T1.contestant_name  =  'Tabatha Gehling'
+
+easy pred: select Name from country where Name > 1
+easy gold: SELECT Name FROM country WHERE IndepYear  >  1950
+
+easy pred: select T2.SurfaceArea from sqlite_sequence as T1 join country as T2 where T1.seq = 1
+easy gold: SELECT sum(SurfaceArea) FROM country WHERE Region  =  "Caribbean"
+
+easy pred: select Continent from country where Region = 1
+easy gold: SELECT Continent FROM country WHERE Name  =  "Anguilla"
+
+extra pred: select T3.Language from city as T1 join country as T2 on T1.CountryCode = T2.Code join countrylanguage as T3 on T2.Code = T3.CountryCode where T1.Name = 1 group by T3.Language order by count ( * ) desc limit 1
+extra gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Aruba" ORDER BY Percentage DESC LIMIT 1
+
+extra pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.Region = 1
+extra gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Aruba" ORDER BY Percentage DESC LIMIT 1
+
+easy pred: select avg ( LifeExpectancy ) from country where Continent = 1
+easy gold: SELECT avg(LifeExpectancy) FROM country WHERE Region  =  "Central Africa"
+
+hard pred: select Name from country order by LifeExpectancy limit 1
+hard gold: SELECT Name FROM country WHERE Continent  =  "Asia" ORDER BY LifeExpectancy LIMIT 1
+
+hard pred: select Name from country where LifeExpectancy = ( select min ( LifeExpectancy ) from country )
+hard gold: SELECT Name FROM country WHERE Continent  =  "Asia" ORDER BY LifeExpectancy LIMIT 1
+
+medium pred: select Population , max ( GNP ) from country where Continent = 1 group by Continent
+medium gold: SELECT sum(Population) ,  max(GNP) FROM country WHERE Continent  =  "Asia"
+
+medium pred: select avg ( LifeExpectancy ) from country where Continent = 1
+medium gold: SELECT avg(LifeExpectancy) FROM country WHERE Continent  =  "Africa" AND GovernmentForm  =  "Republic"
+
+medium pred: select avg ( LifeExpectancy ) from country where Continent = 1
+medium gold: SELECT avg(LifeExpectancy) FROM country WHERE Continent  =  "Africa" AND GovernmentForm  =  "Republic"
+
+medium pred: select sum ( SurfaceArea ) from country where Continent = 1 and Region = 1
+medium gold: SELECT sum(SurfaceArea) FROM country WHERE Continent  =  "Asia" OR Continent  =  "Europe"
+
+easy pred: select Population from country where Region = 1
+easy gold: SELECT sum(Population) FROM city WHERE District  =  "Gelderland"
+
+easy pred: select sum ( Population ) from country where Region = 1
+easy gold: SELECT sum(Population) FROM city WHERE District  =  "Gelderland"
+
+medium pred: select avg ( GNP ) , sum ( Population ) from country where Region = 1
+medium gold: SELECT avg(GNP) ,  sum(population) FROM country WHERE GovernmentForm  =  "US Territory"
+
+medium pred: select count ( T3.Language ) from city as T1 join country as T2 on T1.CountryCode = T2.Code join countrylanguage as T3 on T2.Code = T3.CountryCode where T1.Name = 1
+medium gold: SELECT COUNT(T2.Language) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Aruba"
+
+medium pred: select count ( T3.Language ) from city as T1 join country as T2 on T1.CountryCode = T2.Code join countrylanguage as T3 on T2.Code = T3.CountryCode where T1.Name = 1
+medium gold: SELECT COUNT(T2.Language) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Aruba"
+
+medium pred: select count ( T2.Language ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.Continent = 1
+medium gold: SELECT COUNT(*) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Afghanistan" AND IsOfficial  =  "T"
+
+medium pred: select count ( T2.Language ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.Continent = 1
+medium gold: SELECT COUNT(*) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Name  =  "Afghanistan" AND IsOfficial  =  "T"
+
+extra pred: select Name from country group by Name order by count ( * ) desc limit 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Name ORDER BY COUNT(*) DESC LIMIT 1
+
+extra pred: select Name from country group by Name order by count ( * ) desc limit 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Name ORDER BY COUNT(*) DESC LIMIT 1
+
+extra pred: select Continent from country group by Continent order by count ( * ) desc limit 1
+extra gold: SELECT T1.Continent FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Continent ORDER BY COUNT(*) DESC LIMIT 1
+
+extra pred: select Continent from country group by Continent order by count ( * ) desc limit 1
+extra gold: SELECT T1.Continent FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Continent ORDER BY COUNT(*) DESC LIMIT 1
+
+easy pred: select count ( * ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1 and T2.Language = 1
+easy gold: SELECT COUNT(*) FROM (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "Dutch")
+
+easy pred: select count ( * ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1 intersect select T3.Name from country as T3 join countrylanguage as T4 on T3.Code = T4.CountryCode where T4.Language = 1
+easy gold: SELECT COUNT(*) FROM (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "Dutch")
+
+extra pred: select Name from country where Name = 1 intersect select T1.Name from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "French"
+
+extra pred: select Name from country where Name = 1 intersect select T1.Name from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "French"
+
+extra pred: select Name from country where GovernmentForm = 1 intersect select Name from country where GovernmentForm = 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND T2.IsOfficial  =  "T" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "French" AND T2.IsOfficial  =  "T"
+
+extra pred: select Name from country where GovernmentForm = 1 intersect select T1.Name from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.IsOfficial = 1
+extra gold: SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND T2.IsOfficial  =  "T" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "French" AND T2.IsOfficial  =  "T"
+
+extra pred: select T1.Name from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.IsOfficial = 1 or T2.IsOfficial = 1
+extra gold: SELECT * FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND IsOfficial  =  "T" UNION SELECT * FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "Dutch" AND IsOfficial  =  "T"
+
+extra pred: select T1.Continent from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.GovernmentForm = 1 or T2.IsOfficial = 1
+extra gold: SELECT * FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND IsOfficial  =  "T" UNION SELECT * FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "Dutch" AND IsOfficial  =  "T"
+
+extra pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.Continent = 1 group by T1.Region order by count ( * ) desc limit 1
+extra gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.Continent  =  "Asia" GROUP BY T2.Language ORDER BY COUNT (*) DESC LIMIT 1
+
+hard pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode group by T1.GovernmentForm having count ( * ) = 1
+hard gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.GovernmentForm  =  "Republic" GROUP BY T2.Language HAVING COUNT(*)  =  1
+
+hard pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.GovernmentForm = 1
+hard gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.GovernmentForm  =  "Republic" GROUP BY T2.Language HAVING COUNT(*)  =  1
+
+extra pred: select Name from city where Population = ( select max ( Population ) from city where ID = 1 )
+extra gold: SELECT T1.Name ,  T1.Population FROM city AS T1 JOIN countrylanguage AS T2 ON T1.CountryCode  =  T2.CountryCode WHERE T2.Language  =  "English" ORDER BY T1.Population DESC LIMIT 1
+
+extra pred: select Name from city where Population = ( select max ( Population ) from city where ID = 1 )
+extra gold: SELECT T1.Name ,  T1.Population FROM city AS T1 JOIN countrylanguage AS T2 ON T1.CountryCode  =  T2.CountryCode WHERE T2.Language  =  "English" ORDER BY T1.Population DESC LIMIT 1
+
+hard pred: select Name , Population , LifeExpectancy from country where Continent = 1 order by LifeExpectancy desc limit 1
+hard gold: SELECT Name ,  Population ,  LifeExpectancy FROM country WHERE Continent  =  "Asia" ORDER BY SurfaceArea DESC LIMIT 1
+
+hard pred: select Name , Population , LifeExpectancy from country where Name = 1 order by Population desc limit 1
+hard gold: SELECT Name ,  Population ,  LifeExpectancy FROM country WHERE Continent  =  "Asia" ORDER BY SurfaceArea DESC LIMIT 1
+
+extra pred: select avg ( T1.LifeExpectancy ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.IsOfficial != 1
+extra gold: SELECT avg(LifeExpectancy) FROM country WHERE Name NOT IN (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND T2.IsOfficial  =  "T")
+
+extra pred: select avg ( T1.LifeExpectancy ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.IsOfficial != 1
+extra gold: SELECT avg(LifeExpectancy) FROM country WHERE Name NOT IN (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English" AND T2.IsOfficial  =  "T")
+
+extra pred: select Population from country except select T1.Population from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1
+extra gold: SELECT sum(Population) FROM country WHERE Name NOT IN (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  "English")
+
+medium pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.HeadOfState = 1
+medium gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.HeadOfState  =  "Beatrix" AND T2.IsOfficial  =  "T"
+
+medium pred: select T2.IsOfficial from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.HeadOfState = 1
+medium gold: SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T1.HeadOfState  =  "Beatrix" AND T2.IsOfficial  =  "T"
+
+medium pred: select count ( T2.Language ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T1.IndepYear < 1
+medium gold: SELECT count(DISTINCT T2.Language) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE  IndepYear  <  1930 AND T2.IsOfficial  =  "T"
+
+medium pred: select count ( * ) from country where IndepYear < 1
+medium gold: SELECT count(DISTINCT T2.Language) FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE  IndepYear  <  1930 AND T2.IsOfficial  =  "T"
+
+hard pred: select Name from country where SurfaceArea > ( select max ( SurfaceArea ) from country where Continent = 1 )
+hard gold: SELECT Name FROM country WHERE SurfaceArea  >  (SELECT min(SurfaceArea) FROM country WHERE Continent  =  "Europe")
+
+hard pred: select Continent from country where Region > ( select max ( Region ) from country where Continent = 1 )
+hard gold: SELECT Name FROM country WHERE SurfaceArea  >  (SELECT min(SurfaceArea) FROM country WHERE Continent  =  "Europe")
+
+extra pred: select Name from country where Population < ( select max ( Population ) from country where Continent = 1 )
+extra gold: SELECT Name FROM country WHERE Continent  =  "Africa"  AND population  <  (SELECT max(population) FROM country WHERE Continent  =  "Asia")
+
+extra pred: select Name from country where Population < ( select max ( Population ) from country where Continent = 1 )
+extra gold: SELECT Name FROM country WHERE Continent  =  "Africa"  AND population  <  (SELECT min(population) FROM country WHERE Continent  =  "Asia")
+
+extra pred: select Name from country where Population > ( select max ( Population ) from country where Continent = 1 )
+extra gold: SELECT Name FROM country WHERE Continent  =  "Asia"  AND population  >  (SELECT max(population) FROM country WHERE Continent  =  "Africa")
+
+extra pred: select Name from country where Population > ( select max ( Population ) from country where Continent = 1 )
+extra gold: SELECT Name FROM country WHERE Continent  =  "Asia"  AND population  >  (SELECT min(population) FROM country WHERE Continent  =  "Africa")
+
+hard pred: select Code from country except select T1.Code from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1
+hard gold: SELECT CountryCode FROM countrylanguage EXCEPT SELECT CountryCode FROM countrylanguage WHERE LANGUAGE  =  "English"
+
+hard pred: select Code from country except select T1.Code from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1
+hard gold: SELECT CountryCode FROM countrylanguage EXCEPT SELECT CountryCode FROM countrylanguage WHERE LANGUAGE  =  "English"
+
+easy pred: select Code from country where Code != 1
+easy gold: SELECT DISTINCT CountryCode FROM countrylanguage WHERE LANGUAGE != "English"
+
+easy pred: select T1.Code from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode where T2.Language = 1 except select T3.Code from country as T3 join countrylanguage as T4 on T3.Code = T4.CountryCode where T4.Language = 1
+easy gold: SELECT DISTINCT CountryCode FROM countrylanguage WHERE LANGUAGE != "English"
+
+hard pred: select Code from country except select Code from country where GovernmentForm = 1
+hard gold: SELECT Code FROM country WHERE GovernmentForm != "Republic" EXCEPT SELECT CountryCode FROM countrylanguage WHERE LANGUAGE  =  "English"
+
+hard pred: select Code from country except select Code from country where GovernmentForm = 1
+hard gold: SELECT Code FROM country WHERE GovernmentForm != "Republic" EXCEPT SELECT CountryCode FROM countrylanguage WHERE LANGUAGE  =  "English"
+
+extra pred: select T1.Name from city as T1 join country as T2 on T1.CountryCode = T2.Code join countrylanguage as T3 on T2.Code = T3.CountryCode where T2.Continent = 1 and T3.IsOfficial != 1
+extra gold: SELECT DISTINCT T2.Name FROM country AS T1 JOIN city AS T2 ON T2.CountryCode  =  T1.Code WHERE T1.Continent  =  'Europe' AND T1.Name NOT IN (SELECT T3.Name FROM country AS T3 JOIN countrylanguage AS T4 ON T3.Code  =  T4.CountryCode WHERE T4.IsOfficial  =  'T' AND T4.Language  =  'English')
+
+extra pred: select Name from city where CountryCode = 1 and CountryCode != 1
+extra gold: SELECT DISTINCT T2.Name FROM country AS T1 JOIN city AS T2 ON T2.CountryCode  =  T1.Code WHERE T1.Continent  =  'Europe' AND T1.Name NOT IN (SELECT T3.Name FROM country AS T3 JOIN countrylanguage AS T4 ON T3.Code  =  T4.CountryCode WHERE T4.IsOfficial  =  'T' AND T4.Language  =  'English')
+
+hard pred: select T1.Name from city as T1 join country as T2 on T1.CountryCode = T2.Code where T2.Name = 1 and T2.Region = 1
+hard gold: SELECT DISTINCT T3.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode JOIN city AS T3 ON T1.Code  =  T3.CountryCode WHERE T2.IsOfficial  =  'T' AND T2.Language  =  'Chinese' AND T1.Continent  =  "Asia"
+
+hard pred: select T1.Name from city as T1 join country as T2 on T1.CountryCode = T2.Code where T1.CountryCode = 1 and T2.Region = 1
+hard gold: SELECT DISTINCT T3.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode JOIN city AS T3 ON T1.Code  =  T3.CountryCode WHERE T2.IsOfficial  =  'T' AND T2.Language  =  'Chinese' AND T1.Continent  =  "Asia"
+
+medium pred: select Population , Name , Capital from country order by SurfaceArea desc limit 1
+medium gold: SELECT Name ,  population ,  HeadOfState FROM country ORDER BY SurfaceArea DESC LIMIT 1
+
+medium pred: select Name , count ( * ) from country group by Name having count ( * ) > = 1
+medium gold: SELECT COUNT(T2.Language) ,  T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Name HAVING COUNT(*)  >  2
+
+medium pred: select Name , count ( * ) from country group by Name having count ( * ) > 1
+medium gold: SELECT COUNT(T2.Language) ,  T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode GROUP BY T1.Name HAVING COUNT(*)  >  2
+
+extra pred: select count ( * ) , District from city where Population > ( select avg ( Population ) from city )
+extra gold: SELECT count(*) ,  District FROM city WHERE Population  >  (SELECT avg(Population) FROM city) GROUP BY District
+
+extra pred: select count ( * ) , District from city where Population > ( select avg ( Population ) from city )
+extra gold: SELECT count(*) ,  District FROM city WHERE Population  >  (SELECT avg(Population) FROM city) GROUP BY District
+
+medium pred: select GovernmentForm , avg ( LifeExpectancy ) from country group by GovernmentForm having avg ( LifeExpectancy ) > 1
+medium gold: SELECT sum(Population) ,  GovernmentForm FROM country GROUP BY GovernmentForm HAVING avg(LifeExpectancy)  >  72
+
+medium pred: select avg ( LifeExpectancy ) , avg ( Population ) , Continent from country group by Continent having avg ( Population ) < 1
+medium gold: SELECT sum(Population) ,  avg(LifeExpectancy) ,  Continent FROM country GROUP BY Continent HAVING avg(LifeExpectancy)  <  72
+
+medium pred: select Continent , sum ( LifeExpectancy ) , sum ( LifeExpectancy ) from country group by Continent
+medium gold: SELECT sum(Population) ,  avg(LifeExpectancy) ,  Continent FROM country GROUP BY Continent HAVING avg(LifeExpectancy)  <  72
+
+medium pred: select Name , Region from country order by SurfaceArea desc limit 1
+medium gold: SELECT Name ,  SurfaceArea FROM country ORDER BY SurfaceArea DESC LIMIT 5
+
+medium pred: select Name from country order by Population desc limit 1
+medium gold: SELECT Name FROM country ORDER BY Population ASC LIMIT 3
+
+medium pred: select Name from country where Population = 1 intersect select Name from country where Population > 1
+medium gold: SELECT Name FROM country WHERE continent  =  "Europe" AND Population  =  "80000"
+
+hard pred: select sum ( Population ) , avg ( SurfaceArea ) from country where Continent = 1 and Continent = 1
+hard gold: SELECT sum(Population) ,  avg(SurfaceArea) FROM country WHERE Continent  =  "North America" AND SurfaceArea  >  3000
+
+hard pred: select sum ( Population ) , avg ( SurfaceArea ) , avg ( SurfaceArea ) from country where Continent != 1
+hard gold: SELECT sum(Population) ,  avg(SurfaceArea) FROM country WHERE Continent  =  "North America" AND SurfaceArea  >  3000
+
+hard pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode group by T2.Language order by count ( * ) desc limit 1
+hard gold: SELECT LANGUAGE FROM countrylanguage GROUP BY LANGUAGE ORDER BY count(*) DESC LIMIT 1
+
+hard pred: select T2.Language from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode group by T2.Language order by count ( * ) desc limit 1
+hard gold: SELECT LANGUAGE FROM countrylanguage GROUP BY LANGUAGE ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select T2.Language , max ( T1.Population ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode group by T1.Name order by sum ( T1.Population ) desc limit 1
+medium gold: SELECT LANGUAGE ,  CountryCode ,  max(Percentage) FROM countrylanguage GROUP BY CountryCode
+
+medium pred: select T1.Code , T2.Language , max ( T1.Population ) from country as T1 join countrylanguage as T2 on T1.Code = T2.CountryCode group by T1.Continent order by count ( * ) desc limit 1
+medium gold: SELECT LANGUAGE ,  CountryCode ,  max(Percentage) FROM countrylanguage GROUP BY CountryCode
+
+extra pred: select count ( * ) from country where Continent = 1 order by Population desc limit 1
+extra gold: SELECT count(*) ,   max(Percentage) FROM countrylanguage WHERE LANGUAGE  =  "Spanish" GROUP BY CountryCode
+
+extra pred: select count ( * ) from country where Region = 1
+extra gold: SELECT count(*) ,   max(Percentage) FROM countrylanguage WHERE LANGUAGE  =  "Spanish" GROUP BY CountryCode
+
+medium pred: select Code from country where Continent = 1 order by Population desc limit 1
+medium gold: SELECT CountryCode ,  max(Percentage) FROM countrylanguage WHERE LANGUAGE  =  "Spanish" GROUP BY CountryCode
+
+medium pred: select Code from country where Region = 1
+medium gold: SELECT CountryCode ,  max(Percentage) FROM countrylanguage WHERE LANGUAGE  =  "Spanish" GROUP BY CountryCode
+
+medium pred: select Major_Record_Format from orchestra order by Major_Record_Format
+medium gold: SELECT Major_Record_Format FROM orchestra GROUP BY Major_Record_Format ORDER BY COUNT(*) ASC
+
+easy pred: select grade from Highschooler where name = 1
+easy gold: SELECT grade FROM Highschooler
+
+easy pred: select friend_id from Friend where friend_id = 1
+easy gold: SELECT ID FROM Highschooler WHERE name  =  "Kyle"
+
+medium pred: select name , count ( * ) from Highschooler group by ID
+medium gold: SELECT T2.name ,  count(*) FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id
+
+medium pred: select name , count ( * ) from Highschooler group by ID
+medium gold: SELECT T2.name ,  count(*) FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id
+
+extra pred: select name from Highschooler group by ID order by count ( * ) desc limit 1
+extra gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select name from Highschooler where grade = ( select ID from Highschooler group by ID order by count ( * ) desc limit 1 )
+extra gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select name from Highschooler group by ID having count ( * ) > = 1
+medium gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id HAVING count(*)  >=  3
+
+medium pred: select name from Highschooler group by ID having count ( * ) > = 1
+medium gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id HAVING count(*)  >=  3
+
+hard pred: select name from Highschooler where name = 1
+hard gold: SELECT T3.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id JOIN Highschooler AS T3 ON T1.friend_id  =  T3.id WHERE T2.name  =  "Kyle"
+
+hard pred: select name from Highschooler where name = 1
+hard gold: SELECT T3.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id JOIN Highschooler AS T3 ON T1.friend_id  =  T3.id WHERE T2.name  =  "Kyle"
+
+medium pred: select count ( * ) from Highschooler where name = 1 and name = 1
+medium gold: SELECT count(*) FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id WHERE T2.name  =  "Kyle"
+
+hard pred: select student_id from Friend except select student_id from Likes
+hard gold: SELECT id FROM Highschooler EXCEPT SELECT student_id FROM Friend
+
+hard pred: select student_id from Friend except select student_id from Friend
+hard gold: SELECT id FROM Highschooler EXCEPT SELECT student_id FROM Friend
+
+hard pred: select name from Highschooler where grade = 1 except select name from Highschooler
+hard gold: SELECT name FROM Highschooler EXCEPT SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id
+
+hard pred: select T1.name from Highschooler as T1 join Friend as T2 on T1.ID = T2.friend_id where T2.student_id not in ( select student_id from Friend )
+hard gold: SELECT name FROM Highschooler EXCEPT SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id
+
+hard pred: select ID from Highschooler intersect select friend_id from Friend
+hard gold: SELECT student_id FROM Friend INTERSECT SELECT liked_id FROM Likes
+
+hard pred: select student_id from Likes intersect select student_id from Likes
+hard gold: SELECT student_id FROM Friend INTERSECT SELECT liked_id FROM Likes
+
+hard pred: select name from Highschooler intersect select name from Highschooler
+hard gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id INTERSECT SELECT T2.name FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.liked_id  =  T2.id
+
+hard pred: select name from Highschooler intersect select name from Highschooler where grade = 1
+hard gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id INTERSECT SELECT T2.name FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.liked_id  =  T2.id
+
+medium pred: select name , count ( * ) from Highschooler group by ID
+medium gold: SELECT T2.name ,  count(*) FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id
+
+medium pred: select name , count ( * ) from Highschooler group by ID
+medium gold: SELECT T2.name ,  count(*) FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id
+
+extra pred: select name from Highschooler order by grade desc limit 1
+extra gold: SELECT T2.name FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.name from Highschooler as T1 join Likes as T2 on T1.ID = T2.student_id order by T2.liked_id desc limit 1
+extra gold: SELECT T2.name FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select T1.name from Highschooler as T1 join Friend as T2 on T1.ID = T2.friend_id group by T2.student_id having count ( * ) > = 1
+medium gold: SELECT T2.name FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id HAVING count(*)  >=  2
+
+hard pred: select name from Highschooler where grade = 1 intersect select name from Highschooler where grade > 1
+hard gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id WHERE T2.grade  >  5 GROUP BY T1.student_id HAVING count(*)  >=  2
+
+hard pred: select name from Highschooler where grade = 1 group by ID having count ( * ) > 1
+hard gold: SELECT T2.name FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id WHERE T2.grade  >  5 GROUP BY T1.student_id HAVING count(*)  >=  2
+
+medium pred: select count ( * ) from Friend where friend_id = 1
+medium gold: SELECT count(*) FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id WHERE T2.name  =  "Kyle"
+
+medium pred: select count ( * ) from Highschooler where name = 1
+medium gold: SELECT count(*) FROM Likes AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id WHERE T2.name  =  "Kyle"
+
+hard pred: select avg ( grade ) from Highschooler
+hard gold: SELECT avg(grade) FROM Highschooler WHERE id IN (SELECT T1.student_id FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id)
+
+hard pred: select avg ( grade ) from Highschooler
+hard gold: SELECT avg(grade) FROM Highschooler WHERE id IN (SELECT T1.student_id FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id)
+
+extra pred: select min ( grade ) from Highschooler where ID not in ( select student_id from Friend )
+extra gold: SELECT min(grade) FROM Highschooler WHERE id NOT IN (SELECT T1.student_id FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id)
+
+extra pred: select min ( grade ) from Highschooler where ID not in ( select student_id from Friend )
+extra gold: SELECT min(grade) FROM Highschooler WHERE id NOT IN (SELECT T1.student_id FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id)
+
+hard pred: select state from Owners union select state from Professionals
+hard gold: SELECT state FROM Owners INTERSECT SELECT state FROM Professionals
+
+hard pred: select state from Professionals union select state from Professionals
+hard gold: SELECT state FROM Owners INTERSECT SELECT state FROM Professionals
+
+hard pred: select avg ( age ) from Dogs
+hard gold: SELECT avg(age) FROM Dogs WHERE dog_id IN ( SELECT dog_id FROM Treatments )
+
+hard pred: select avg ( age ) from Dogs
+hard gold: SELECT avg(age) FROM Dogs WHERE dog_id IN ( SELECT dog_id FROM Treatments )
+
+extra pred: select professional_id , last_name , home_phone from Professionals where state = 1 union select professional_id , last_name , home_phone from Professionals group by professional_id having count ( * ) > 1
+extra gold: SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2
+
+extra pred: select professional_id , last_name , home_phone from Professionals where state = 1 union select professional_id , last_name , home_phone from Professionals group by home_phone having count ( * ) > 1
+extra gold: SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2
+
+hard pred: select name from Dogs where dog_id not in ( select dog_id from Treatments where cost_of_treatment > 1 )
+hard gold: SELECT name FROM Dogs WHERE dog_id NOT IN( SELECT dog_id FROM Treatments GROUP BY dog_id HAVING sum(cost_of_treatment)  >  1000 )
+
+hard pred: select name from Dogs where owner_id in ( select owner_id from Owners where first_name > 1 )
+hard gold: SELECT name FROM Dogs WHERE dog_id NOT IN( SELECT dog_id FROM Treatments GROUP BY dog_id HAVING sum(cost_of_treatment)  >  1000 )
+
+hard pred: select first_name from Professionals except select first_name from Professionals
+hard gold: SELECT first_name FROM Professionals UNION SELECT first_name FROM Owners EXCEPT SELECT name FROM Dogs
+
+eval_err_num:4
+hard pred: select T1.first_name from Professionals as T1 join Treatments as T2 on T1.professional_id = T2.professional_id join Dogs as T3 on T2.dog_id = T3.dog_id where T3.name = 1 union select T7.first_name from Owners as T7 join Dogs as T5 on T7.owner_id = T5.owner_id join Treatments as T6 on T5.dog_id = T6.dog_id join Professionals as T7 on T6.professional_id = T7.professional_id where T4.first_name = 1
+hard gold: SELECT first_name FROM Professionals UNION SELECT first_name FROM Owners EXCEPT SELECT name FROM Dogs
+
+extra pred: select professional_id , role_code , email_address from Professionals except select professional_id , role_code , email_address from Professionals
+extra gold: SELECT professional_id ,  role_code ,  email_address FROM Professionals EXCEPT SELECT T1.professional_id ,  T1.role_code ,  T1.email_address FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id
+
+extra pred: select professional_id , role_code , email_address from Professionals except select professional_id , role_code , email_address from Professionals
+extra gold: SELECT professional_id ,  role_code ,  email_address FROM Professionals EXCEPT SELECT T1.professional_id ,  T1.role_code ,  T1.email_address FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id
+
+extra pred: select owner_id , first_name , last_name from Owners group by owner_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T2.first_name ,  T2.last_name FROM Dogs AS T1 JOIN Owners AS T2 ON T1.owner_id  =  T2.owner_id GROUP BY T1.owner_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select owner_id , first_name , last_name from Owners group by owner_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T2.first_name ,  T2.last_name FROM Dogs AS T1 JOIN Owners AS T2 ON T1.owner_id  =  T2.owner_id GROUP BY T1.owner_id ORDER BY count(*) DESC LIMIT 1
+
+medium pred: select professional_id , role_code , first_name from Professionals group by professional_id having count ( * ) > = 1
+medium gold: SELECT T1.professional_id ,  T1.role_code ,  T1.first_name FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >=  2
+
+medium pred: select professional_id , role_code , first_name from Professionals group by professional_id having count ( * ) > = 1
+medium gold: SELECT T1.professional_id ,  T1.role_code ,  T1.first_name FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >=  2
+
+extra pred: select T1.breed_name from Breeds as T1 join Dogs as T2 on T1.breed_code = T2.breed_code group by T2.breed_code order by count ( * ) desc limit 1
+extra gold: SELECT T1.breed_name FROM Breeds AS T1 JOIN Dogs AS T2 ON T1.breed_code  =  T2.breed_code GROUP BY T1.breed_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T1.breed_name from Breeds as T1 join Dogs as T2 on T1.breed_code = T2.breed_code group by T2.breed_code order by count ( * ) desc limit 1
+extra gold: SELECT T1.breed_name FROM Breeds AS T1 JOIN Dogs AS T2 ON T1.breed_code  =  T2.breed_code GROUP BY T1.breed_name ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select owner_id , last_name from Owners group by owner_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T1.last_name FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id JOIN Treatments AS T3 ON T2.dog_id  =  T3.dog_id GROUP BY T1.owner_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select owner_id , last_name from Owners group by owner_id order by count ( * ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T1.last_name FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id JOIN Treatments AS T3 ON T2.dog_id  =  T3.dog_id GROUP BY T1.owner_id ORDER BY count(*) DESC LIMIT 1
+
+extra pred: select T3.owner_id , T1.zip_code from Owners as T1 join Charges as T2 join Dogs as T3 on T1.owner_id = T3.owner_id group by T3.owner_id order by sum ( T2.charge_amount ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T1.zip_code FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id JOIN Treatments AS T3 ON T2.dog_id  =  T3.dog_id GROUP BY T1.owner_id ORDER BY sum(T3.cost_of_treatment) DESC LIMIT 1
+
+extra pred: select T1.owner_id , T1.zip_code from Owners as T1 join Charges as T2 join Dogs as T3 on T1.owner_id = T3.owner_id group by T3.owner_id order by sum ( T2.charge_amount ) desc limit 1
+extra gold: SELECT T1.owner_id ,  T1.zip_code FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id JOIN Treatments AS T3 ON T2.dog_id  =  T3.dog_id GROUP BY T1.owner_id ORDER BY sum(T3.cost_of_treatment) DESC LIMIT 1
+
+medium pred: select professional_id , cell_number from Professionals group by professional_id having count ( * ) > = 1
+medium gold: SELECT T1.professional_id ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >=  2
+
+medium pred: select professional_id , cell_number from Professionals group by professional_id having count ( * ) > = 1
+medium gold: SELECT T1.professional_id ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >=  2
+
+medium pred: select T1.treatment_type_code , T2.treatment_type_code from Treatment_Types as T1 join Treatments as T2 on T1.treatment_type_code = T2.treatment_type_code
+medium gold: SELECT T1.cost_of_treatment ,  T2.treatment_type_description FROM Treatments AS T1 JOIN treatment_types AS T2 ON T1.treatment_type_code  =  T2.treatment_type_code
+
+extra pred: select T1.name , T2.date_of_treatment from Dogs as T1 join Treatments as T2 on T1.dog_id = T2.dog_id order by T1.date_arrived limit 1
+extra gold: SELECT T1.name ,  T2.date_of_treatment FROM Dogs AS T1 JOIN Treatments AS T2 ON T1.dog_id  =  T2.dog_id WHERE T1.breed_code  =  ( SELECT breed_code FROM Dogs GROUP BY breed_code ORDER BY count(*) ASC LIMIT 1 )
+
+extra pred: select T1.name , T2.date_of_treatment from Dogs as T1 join Treatments as T2 on T1.dog_id = T2.dog_id order by T2.date_of_treatment limit 1
+extra gold: SELECT T1.name ,  T2.date_of_treatment FROM Dogs AS T1 JOIN Treatments AS T2 ON T1.dog_id  =  T2.dog_id WHERE T1.breed_code  =  ( SELECT breed_code FROM Dogs GROUP BY breed_code ORDER BY count(*) ASC LIMIT 1 )
+
+medium pred: select date_arrived , date_departed from Dogs
+medium gold: SELECT DISTINCT T1.date_arrived ,  T1.date_departed FROM Dogs AS T1 JOIN Treatments AS T2 ON T1.dog_id  =  T2.dog_id
+
+medium pred: select date_arrived , date_departed from Dogs
+medium gold: SELECT DISTINCT T1.date_arrived ,  T1.date_departed FROM Dogs AS T1 JOIN Treatments AS T2 ON T1.dog_id  =  T2.dog_id
+
+extra pred: select T1.last_name from Owners as T1 join Dogs as T2 on T1.owner_id = T2.owner_id order by T2.age limit 1
+extra gold: SELECT T1.last_name FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id WHERE T2.age  =  ( SELECT max(age) FROM Dogs )
+
+extra pred: select T1.last_name from Owners as T1 join Dogs as T2 on T1.owner_id = T2.owner_id order by T2.age limit 1
+extra gold: SELECT T1.last_name FROM Owners AS T1 JOIN Dogs AS T2 ON T1.owner_id  =  T2.owner_id WHERE T2.age  =  ( SELECT max(age) FROM Dogs )
+
+easy pred: select count ( * ) from Dogs
+easy gold: SELECT count(DISTINCT dog_id) FROM Treatments
+
+easy pred: select count ( * ) from Dogs
+easy gold: SELECT count(DISTINCT dog_id) FROM Treatments
+
+easy pred: select count ( treatment_id ) from Treatments
+easy gold: SELECT count(DISTINCT professional_id) FROM Treatments
+
+medium pred: select role_code , street , state from Professionals where city like 1
+medium gold: SELECT role_code ,  street ,  city ,  state FROM professionals WHERE city LIKE '%West%'
+
+medium pred: select role_code , street , city from Professionals where city like 1
+medium gold: SELECT role_code ,  street ,  city ,  state FROM professionals WHERE city LIKE '%West%'
+
+medium pred: select max ( cost_of_treatment ) from Treatments
+medium gold: SELECT cost_of_treatment FROM Treatments ORDER BY date_of_treatment DESC LIMIT 1
+
+medium pred: select cost_of_treatment from Treatments order by cost_of_treatment desc limit 1
+medium gold: SELECT cost_of_treatment FROM Treatments ORDER BY date_of_treatment DESC LIMIT 1
+
+extra pred: select count ( * ) from Dogs
+extra gold: SELECT count(*) FROM Dogs WHERE dog_id NOT IN ( SELECT dog_id FROM Treatments )
+
+easy pred: select age from Dogs order by age desc limit 1
+easy gold: SELECT max(age) FROM Dogs
+
+easy pred: select age from Dogs order by age desc limit 1
+easy gold: SELECT max(age) FROM Dogs
+
+easy pred: select charge_amount from Charges order by charge_amount desc limit 1
+easy gold: SELECT max(charge_amount) FROM Charges
+
+easy pred: select charge_amount from Charges order by charge_amount desc limit 1
+easy gold: SELECT max(charge_amount) FROM Charges
+
+medium pred: select T3.breed_code , T1.size_code from Sizes as T1 join Dogs as T2 on T1.size_code = T2.size_code join Breeds as T3 on T2.breed_code = T3.breed_code
+medium gold: SELECT DISTINCT breed_code ,  size_code FROM dogs
+
+hard pred: select Citizenship from singer where Name = 1
+hard gold: SELECT Citizenship FROM singer GROUP BY Citizenship ORDER BY COUNT(*) DESC LIMIT 1
+
+medium pred: select Name from singer group by Name having count ( * ) > 1
+medium gold: SELECT T1.Name FROM singer AS T1 JOIN song AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Name HAVING COUNT(*)  >  1
+
+medium pred: select T1.Name from singer as T1 join song as T2 on T1.Singer_ID = T2.Singer_ID group by T2.Singer_ID having count ( * ) > 1
+medium gold: SELECT T1.Name FROM singer AS T1 JOIN song AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Name HAVING COUNT(*)  >  1
+
+medium pred: select T1.Name , sum ( T2.Sales ) from singer as T1 join song as T2 on T1.Singer_ID = T2.Singer_ID group by T2.Singer_ID
+medium gold: SELECT T1.Name ,  sum(T2.Sales) FROM singer AS T1 JOIN song AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Name
+
+medium pred: select T2.feature_name from Ref_Feature_Types as T1 join Other_Available_Features as T2 on T1.feature_type_code = T2.feature_type_code where T1.feature_type_name = 1
+medium gold: SELECT T2.feature_type_name FROM Other_Available_Features AS T1 JOIN Ref_Feature_Types AS T2 ON T1.feature_type_code  =  T2.feature_type_code WHERE T1.feature_name  =  "AirCon"
+
+medium pred: select property_type_description from Ref_Property_Types
+medium gold: SELECT T2.property_type_description FROM Properties AS T1 JOIN Ref_Property_Types AS T2 ON T1.property_type_code  =  T2.property_type_code GROUP BY T1.property_type_code
+
+hard pred: select property_name from Properties where room_count > 1 or room_count > 1
+hard gold: SELECT property_name FROM Properties WHERE property_type_code  =  "House" UNION SELECT property_name FROM Properties WHERE property_type_code  =  "Apartment" AND room_count  >  1
+
+                     easy                 medium               hard                 extra                all                 
+count                250                  440                  174                  170                  1034                
+
+====================== EXACT MATCHING ACCURACY =====================
+exact match          0.764                0.630                0.460                0.288                0.577               
+
+---------------------PARTIAL MATCHING ACCURACY----------------------
+select               0.920                0.861                0.942                0.834                0.884               
+select(no AGG)       0.952                0.870                0.948                0.852                0.900               
+where                0.793                0.777                0.593                0.418                0.677               
+where(no OP)         0.811                0.777                0.663                0.527                0.715               
+group(no Having)     0.842                0.797                0.732                0.800                0.791               
+group                0.842                0.744                0.707                0.760                0.750               
+order                0.786                0.753                0.788                0.795                0.779               
+and/or               1.000                0.970                0.988                0.916                0.972               
+IUEN                 0.000                0.000                0.357                0.323                0.321               
+keywords             0.923                0.920                0.811                0.750                0.866               
+---------------------- PARTIAL MATCHING RECALL ----------------------
+select               0.916                0.859                0.937                0.829                0.881               
+select(no AGG)       0.948                0.868                0.943                0.847                0.897               
+where                0.815                0.781                0.554                0.388                0.664               
+where(no OP)         0.833                0.781                0.620                0.490                0.702               
+group(no Having)     0.800                0.809                0.769                0.759                0.788               
+group                0.800                0.756                0.744                0.722                0.747               
+order                1.000                0.773                0.695                0.765                0.772               
+and/or               0.996                0.991                0.994                0.962                0.988               
+IUEN                 0.000                0.000                0.357                0.278                0.321               
+keywords             0.960                0.922                0.787                0.741                0.866               
+---------------------- PARTIAL MATCHING F1 --------------------------
+select               0.918                0.860                0.939                0.832                0.883               
+select(no AGG)       0.950                0.869                0.945                0.850                0.898               
+where                0.804                0.779                0.573                0.402                0.670               
+where(no OP)         0.822                0.779                0.640                0.508                0.708               
+group(no Having)     0.821                0.803                0.750                0.779                0.790               
+group                0.821                0.750                0.725                0.740                0.749               
+order                0.880                0.763                0.739                0.780                0.775               
+and/or               0.998                0.980                0.991                0.938                0.980               
+IUEN                 1.000                1.000                0.357                0.299                0.321               
+keywords             0.941                0.921                0.799                0.746                0.866               

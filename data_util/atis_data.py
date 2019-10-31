@@ -28,7 +28,10 @@ class ATISDataset():
 
         database_schema = None
         if params.database_schema_filename:
-            database_schema, column_names_surface_form, column_names_embedder_input = self.read_database_schema_simple(params.database_schema_filename)
+            if 'removefrom' not in params.data_directory:
+                database_schema, column_names_surface_form, column_names_embedder_input = self.read_database_schema_simple(params.database_schema_filename)
+            else:
+                database_schema, column_names_surface_form, column_names_embedder_input = self.read_database_schema(params.database_schema_filename)
 
         int_load_function = load_function(params,
                                           self.entities_dictionary,
@@ -162,6 +165,50 @@ class ATISDataset():
 
             for table_name in table_names:
                 column_names_embedder_input.append(table_name.split())
+
+        database_schema = database_schema_dict
+
+        return database_schema, column_names_surface_form, column_names_embedder_input
+
+    def read_database_schema(self, database_schema_filename):
+        with open(database_schema_filename, "r") as f:
+            database_schema = json.load(f)
+
+        database_schema_dict = {}
+        column_names_surface_form = []
+        column_names_embedder_input = []
+        for table_schema in database_schema:
+            db_id = table_schema['db_id']
+            database_schema_dict[db_id] = table_schema
+
+            column_names = table_schema['column_names']
+            column_names_original = table_schema['column_names_original']
+            table_names = table_schema['table_names']
+            table_names_original = table_schema['table_names_original']
+
+            for i, (table_id, column_name) in enumerate(column_names_original):
+                if table_id >= 0:
+                    table_name = table_names_original[table_id]
+                    column_name_surface_form = '{}.{}'.format(table_name,column_name)
+                else:
+                    column_name_surface_form = column_name
+                column_names_surface_form.append(column_name_surface_form.lower())
+
+            # also add table_name.*
+            for table_name in table_names_original:
+                column_names_surface_form.append('{}.*'.format(table_name.lower()))
+
+            for i, (table_id, column_name) in enumerate(column_names):
+                if table_id >= 0:
+                    table_name = table_names[table_id]
+                    column_name_embedder_input = table_name + ' . ' + column_name
+                else:
+                    column_name_embedder_input = column_name
+                column_names_embedder_input.append(column_name_embedder_input.split())
+
+            for table_name in table_names:
+                column_name_embedder_input = table_name + ' . *'
+                column_names_embedder_input.append(column_name_embedder_input.split())
 
         database_schema = database_schema_dict
 
