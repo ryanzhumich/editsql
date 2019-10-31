@@ -1,12 +1,20 @@
-# CD-Seq2Seq for SParC and CoSQL
+# EditSQL for [Spider](https://yale-lily.github.io/spider), [SParC](https://yale-lily.github.io/sparc), [CoSQL](https://yale-lily.github.io/cosql)
 
-This is a pytorch implementation of the CD-Seq2Seq baseline in the following papers
+This is a pytorch implementation of the CD-Seq2Seq baseline and the EditSQL model in the following papers
 - "[SParC: Cross-Domain Semantic Parsing in Context](https://arxiv.org/abs/1906.02285)", ACL 2019
-- "[CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases](http://croma.eecs.umich.edu/pubs/coSQL_EMNLP2019.pdf)", EMNLP 2019
+- "[CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases](https://arxiv.org/pdf/1909.05378.pdf)", EMNLP 2019
 - "[Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions](https://arxiv.org/pdf/1909.00786.pdf)", EMNLP 2019
 
 Please cite the papers if you use our data and code.
 ```
+@InProceedings{yu2018spider,
+    title = "Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task",
+    author = "Tao Yu, Rui Zhang, Kai Yang, Michihiro Yasunaga, Dongxu Wang, Zifan Li, James Ma, Irene Li, Qingning Yao, Shanelle Roman, Zilin Zhang, Dragomir Radev",
+    booktitle = "Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing",
+    year = "2018",
+    address = "Brussels, Belgium"
+}
+
 @InProceedings{yu2019sparc,
   author =      "Tao Yu, Rui Zhang, Michihiro Yasunaga, Yi Chern Tan, Xi Victoria Lin, Suyi Li, Heyang Er, Irene Li, Bo Pang, Tao Chen, Emily Ji, Shreya Dixit, David Proctor, Sungrok Shim, Jonathan Kraft, Vincent Zhang, Caiming Xiong, Richard Socher, Dragomir Radev",
   title =       "SParC: Cross-Domain Semantic Parsing in Context",
@@ -46,12 +54,33 @@ pip install -r requirements.txt
 
 The evaluation scripts use python 2.7
 
+### Run Spider experiment
+First, download [Spider](https://yale-lily.github.io/spider). Then please follow
+
+- `run_spider_editsql.sh`. We saved our experimental logs at `logs/logs_spider_editsql`
+
+This reproduces the Spider result in "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions".
+
+<table>
+  <tr>
+    <td></td>
+    <td>Dev</td>
+    <td>Test</td>
+  </tr>
+  <tr>
+    <td>EditSQL</td>
+    <td>57.6</td>
+    <td>53.4</td>
+  </tr>
+</table>
+
 ### Run SParC experiment
 
-First, download SParC from [here](https://yale-lily.github.io/sparc). Then please follow
+First, download [SParC](https://yale-lily.github.io/sparc). Then please follow
 
-- `run_sparc_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq`
-- use segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_segment_copy`
+- use cdseq2seq: `run_sparc_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq`
+- use cdseq2seq with segment copy:  `run_sparc_cdseq2seq_segment_copy.sh`. We saved our experimental logs at `logs/logs_sparc_cdseq2seq_segment_copy`
+- use editsql: `run_sparc_editsql.sh`. We saved our experimental logs at `logs/logs_sparc_editsql`
 
 This reproduces the SParC result in "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions".
 
@@ -88,6 +117,20 @@ This reproduces the SParC result in "Editing-Based SQL Query Generation for Cros
     <td>-</td>
     <td>10.0</td>
     <td>-</td>
+  </tr>
+  <tr>
+    <td>EditSQL (use predicted query)</td>
+    <td>47.2</td>
+    <td>47.9</td>
+    <td>29.5</td>
+    <td>25.3</td>
+  </tr>
+  <tr>
+    <td>EditSQL (use gold query)</td>
+    <td>53.4</td>
+    <td>54.5</td>
+    <td>29.2</td>
+    <td>25.0</td>
   </tr>
 </table>
 
