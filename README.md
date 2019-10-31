@@ -54,6 +54,8 @@ pip install -r requirements.txt
 
 The evaluation scripts use python 2.7
 
+Download Pretrained BERT model from [here](https://drive.google.com/file/d/1f_LEWVgrtZLRuoiExJa5fNzTS8-WcAX9/view?usp=sharing) as `model/bert/data/annotated_wikisql_and_PyTorch_bert_param/pytorch_model_uncased_L-12_H-768_A-12.bin`.
+
 ### Run Spider experiment
 First, download [Spider](https://yale-lily.github.io/spider). Then please follow
 
