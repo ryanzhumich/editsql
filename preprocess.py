@@ -478,7 +478,9 @@ def preprocess(dataset, remove_from=False):
   if dataset == 'spider':
     spider_dir = 'data/spider/'
     database_schema_filename = 'data/spider/tables.json'
-    output_dir = 'data/spider_data_removefrom'
+    output_dir = 'data/spider_data'
+    if remove_from:
+      output_dir = 'data/spider_data_removefrom'
     train_database, dev_database = read_db_split(spider_dir)
   elif dataset == 'sparc':
     sparc_dir = 'data/sparc/'
@@ -491,6 +493,8 @@ def preprocess(dataset, remove_from=False):
     cosql_dir = 'data/cosql/'
     database_schema_filename = 'data/cosql/tables.json'
     output_dir = 'data/cosql_data'
+    if remove_from:
+      output_dir = 'data/cosql_data_removefrom'
     train_database, dev_database = read_db_split(cosql_dir)
 
   if os.path.isdir(output_dir):

@@ -198,7 +198,7 @@ class SequencePredictorWithSchema(torch.nn.Module):
                     distribution_map = prediction.aligned_tokens
                     assert len(probabilities) == len(distribution_map)
 
-                    if (not self.params.no_edit) and self.params.use_previous_query and self.params.use_copy_switch and len(previous_queries) > 0:
+                    if self.params.use_previous_query and self.params.use_copy_switch and len(previous_queries) > 0:
                         assert prediction.query_scores.dim() == 1
                         query_token_probabilities = F.softmax(prediction.query_scores, dim=0).cpu().data.numpy().tolist()
 
