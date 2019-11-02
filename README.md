@@ -47,8 +47,8 @@ Contact Rui Zhang for any question.
 The model is tested in python 3.6 and pytorch 1.0. We recommend using `conda` and `pip`:
 
 ```
-conda create -n cdseq2seq python=3.6
-source activate cdseq2seq
+conda create -n editsql python=3.6
+source activate editsql
 pip install -r requirements.txt
 ```
 
@@ -163,6 +163,13 @@ This reproduces the SQL-grounded dialog state tracking result in "CoSQL: A Conve
     <td>13.9</td>
     <td>2.1</td>
     <td>2.6</td>
+  </tr>
+  <tr>
+    <td>EditSQL</td>
+    <td>39.9</td>
+    <td>40.8</td>
+    <td>12.3</td>
+    <td>13.7</td>
   </tr>
 </table>
 
