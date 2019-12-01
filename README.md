@@ -59,7 +59,7 @@ Download Pretrained BERT model from [here](https://drive.google.com/file/d/1f_LE
 ### Run Spider experiment
 First, download [Spider](https://yale-lily.github.io/spider). Then please follow
 
-- `run_spider_editsql.sh`. We saved our experimental logs at `logs/logs_spider_editsql`
+- `run_spider_editsql.sh`. We saved our experimental logs at `logs/logs_spider_editsql`. The dev results can be reproduced by `test_spider_editsql.sh` with the trained model `logs/logs_spider_editsql/save_12`.
 
 This reproduces the Spider result in "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions".
 
@@ -140,7 +140,8 @@ This reproduces the SParC result in "Editing-Based SQL Query Generation for Cros
 
 First, download CoSQL from [here](https://yale-lily.github.io/cosql). Then please follow
 
-- `run_cosql_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_cosql_cdseq2seq`
+- `run_cosql_cdseq2seq.sh`. We saved our experimental logs at `logs/logs_cosql_cdseq2seq`.
+- `run_cosql_editsql.sh`. We saved our experimental logs at `logs/logs_cosql_editsql`. The dev results can be reproduced by `test_cosql_editsql.sh` with the trained model downloaded from [here](https://drive.google.com/file/d/1ggf05rLVUpqamkEFbhu2CX35-PTGpFx4/view?usp=sharing) and put under `logs/logs_cosql_editsql/save_12_cosql_editsql`.
 
 This reproduces the SQL-grounded dialog state tracking result in "CoSQL: A Conversational Text-to-SQL Challenge Towards Cross-Domain Natural Language Interfaces to Databases".
 

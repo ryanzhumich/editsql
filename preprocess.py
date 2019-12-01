@@ -244,6 +244,7 @@ def check_oov(format_sql_final, output_vocab, schema_tokens):
   for sql_tok in format_sql_final.split():
     if not (sql_tok in schema_tokens or sql_tok in output_vocab):
       print('OOV!', sql_tok)
+      raise Exception('OOV')
 
 
 def normalize_space(format_sql):
@@ -401,7 +402,11 @@ def read_data_json(split_json, interaction_list, database_schemas, column_names,
         continue
 
       if remove_from:
-        turn_sql_parse = parse_sql(turn_sql, db_id, column_names[db_id], output_vocab, schema_tokens[db_id], database_schemas[db_id])
+        try:
+          turn_sql_parse = parse_sql(turn_sql, db_id, column_names[db_id], output_vocab, schema_tokens[db_id], database_schemas[db_id])
+        except:
+          print('continue')
+          continue
       else:
         turn_sql_parse = turn_sql
 
@@ -411,7 +416,8 @@ def read_data_json(split_json, interaction_list, database_schemas, column_names,
         turn_utterance = turn['utterance']
 
       interaction['interaction'].append({'utterance': turn_utterance, 'sql': turn_sql_parse})
-    interaction_list[db_id].append(interaction)
+    if len(interaction['interaction']) > 0:
+      interaction_list[db_id].append(interaction)
 
   return interaction_list
 
