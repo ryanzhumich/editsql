@@ -82,6 +82,12 @@ class ATISDataset():
             # skip column_names_surface_form but keep sql_keywords
             skip_tokens = list(set(column_names_surface_form) - set(sql_keywords))
 
+            if params.data_directory == 'processed_data_sparc_removefrom_test':
+              all_output_seqs = []
+              out_vocab_ordered = ['select', 'value', ')', '(', 'where', '=', ',', 'count', 'group_by', 'order_by', 'limit_value', 'desc', '>', 'distinct', 'avg', 'and', 'having', '<', 'in', 'max', 'sum', 'asc', 'like', 'not', 'or', 'min', 'intersect', 'except', '!=', 'union', 'between', '-', '+']
+              for i in range(len(out_vocab_ordered)):
+                all_output_seqs.append(out_vocab_ordered[:i+1])
+
             self.output_vocabulary = ATISVocabulary(
                 all_output_seqs,
                 os.path.join(params.data_directory, params.output_vocabulary_filename),
