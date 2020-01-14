@@ -59,7 +59,7 @@ Download Pretrained BERT model from [here](https://drive.google.com/file/d/1f_LE
 ### Run Spider experiment
 First, download [Spider](https://yale-lily.github.io/spider). Then please follow
 
-- `run_spider_editsql.sh`. We saved our experimental logs at `logs/logs_spider_editsql`. The dev results can be reproduced by `test_spider_editsql.sh` with the trained model `logs/logs_spider_editsql/save_12`.
+- `run_spider_editsql.sh`. We saved our experimental logs at `logs/logs_spider_editsql`. The dev results can be reproduced by `test_spider_editsql.sh` with the trained model downloaded from [here](https://drive.google.com/file/d/1KwXIdJBYKG0-PzCi1GvvSnUxJzxNq_CL/view?usp=sharing) and put under `logs/logs_spider_editsql/save_12`.
 
 This reproduces the Spider result in "Editing-Based SQL Query Generation for Cross-Domain Context-Dependent Questions".
 
