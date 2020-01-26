@@ -417,7 +417,7 @@ def write_and_evaluate(postprocess_sqls, db_path, table_schema_path, gold_path, 
         for postprocess_sql, interaction_id, turn_id in postprocess_sqls[db]:
           f.write(postprocess_sql+'\n')
 
-    command = 'python2 eval_scripts/evaluation.py --db {} --table {} --etype match --gold {} --pred {}'.format(db_path,
+    command = 'python3 eval_scripts/evaluation.py --db {} --table {} --etype match --gold {} --pred {}'.format(db_path,
                                                                                                   table_schema_path,
                                                                                                   gold_path,
                                                                                                   os.path.abspath(output_file))
