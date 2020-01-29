@@ -447,48 +447,48 @@ def print_scores(scores, etype):
     partial_types = ['select', 'select(no AGG)', 'where', 'where(no OP)', 'group(no Having)',
                      'group', 'order', 'and/or', 'IUEN', 'keywords']
 
-    print "{:20} {:20} {:20} {:20} {:20} {:20} {:20}".format("", *levels)
+    print("{:20} {:20} {:20} {:20} {:20} {:20} {:20}".format("", *levels))
     counts = [scores[level]['count'] for level in levels]
-    print "{:20} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d}".format("count", *counts)
+    print("{:20} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d}".format("count", *counts))
 
     if etype in ["all", "exec"]:
-        print '=====================   EXECUTION ACCURACY     ====================='
+        print('=====================   EXECUTION ACCURACY     =====================')
         this_scores = [scores[level]['exec'] for level in levels]
-        print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("execution", *this_scores)
+        print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("execution", *this_scores))
 
     if etype in ["all", "match"]:
-        print '\n====================== EXACT MATCHING ACCURACY ====================='
+        print('\n====================== EXACT MATCHING ACCURACY =====================')
         exact_scores = [scores[level]['exact'] for level in levels]
-        print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("exact match", *exact_scores)
-        print '\n---------------------PARTIAL MATCHING ACCURACY----------------------'
+        print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("exact match", *exact_scores))
+        print('\n---------------------PARTIAL MATCHING ACCURACY----------------------')
         for type_ in partial_types:
             this_scores = [scores[level]['partial'][type_]['acc'] for level in levels]
-            print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores)
+            print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores))
 
-        print '---------------------- PARTIAL MATCHING RECALL ----------------------'
+        print('---------------------- PARTIAL MATCHING RECALL ----------------------')
         for type_ in partial_types:
             this_scores = [scores[level]['partial'][type_]['rec'] for level in levels]
-            print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores)
+            print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores))
 
-        print '---------------------- PARTIAL MATCHING F1 --------------------------'
+        print('---------------------- PARTIAL MATCHING F1 --------------------------')
         for type_ in partial_types:
             this_scores = [scores[level]['partial'][type_]['f1'] for level in levels]
-            print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores)
+            print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores))
 
 
-    print "\n\n{:20} {:20} {:20} {:20} {:20} {:20}".format("", *turns)
+    print("\n\n{:20} {:20} {:20} {:20} {:20} {:20}".format("", *turns))
     counts = [scores[turn]['count'] for turn in turns]
-    print "{:20} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d}".format("count", *counts)
+    print("{:20} {:<20d} {:<20d} {:<20d} {:<20d} {:<20d}".format("count", *counts))
 
     if etype in ["all", "exec"]:
-        print '=====================   TRUN XECUTION ACCURACY     ====================='
+        print('=====================   TRUN XECUTION ACCURACY     =====================')
         this_scores = [scores[turn]['exec'] for turn in turns]
-        print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("execution", *this_scores)
+        print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("execution", *this_scores))
 
     if etype in ["all", "match"]:
-        print '\n====================== TRUN EXACT MATCHING ACCURACY ====================='
+        print('\n====================== TRUN EXACT MATCHING ACCURACY =====================')
         exact_scores = [scores[turn]['exact'] for turn in turns]
-        print "{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("exact match", *exact_scores)
+        print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format("exact match", *exact_scores))
 
 def evaluate(gold, predict, db_dir, etype, kmaps):
     with open(gold) as f:
