@@ -218,6 +218,12 @@ We saved our experimental logs at `logs/logs_atis`
   </tr>
 </table>
 
+### Note
+
+- Some interactions can be long to cause OOM issue on GPU. You can skip those interactions like [this](https://github.com/ryanzhumich/editsql/blob/master/model_util.py#L189) depending on your hardware.
+
+- EditSQL does not predict values in SQL. In order to generate values, the model should be able to (1) copy from the question inputs, (2) retrieve from the database content (database content is available), (3) generate numbers (e.g. 1 or 3 after LIMIT in some SQL queries). More information is available at [Spider](https://yale-lily.github.io/spider).
+
 ### Acknowledgement
 
 This implementation is based on "[Learning to map context dependent sentences to executable formal queries](https://github.com/lil-lab/atis)". Alane Suhr, Srinivasan Iyer, and Yoav Artzi. In NAACL, 2018.
