@@ -1,4 +1,4 @@
-torch==1.0.1
+torch==2.2.0
 sqlparse
 pymysql
 progressbar
